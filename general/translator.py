@@ -1,5 +1,8 @@
 from googletrans import Translator
 import asyncio
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 translator = Translator()
 
