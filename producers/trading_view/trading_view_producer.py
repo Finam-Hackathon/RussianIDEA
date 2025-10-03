@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from requests_html import HTMLSession
 import os
 
-from general.Settings import TIMEZONE, in_period
+from general.settings import TIMEZONE, in_period
 
 SESSION_ID = os.getenv('SESSION_ID')
 SESSION_ID_SIGN = os.getenv('SESSION_ID_SIGN')
