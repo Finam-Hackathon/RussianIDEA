@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/general/translator.py">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/general/translator.py" />
+              <option name="originalContent" value="from googletrans import Translator&#10;&#10;translator = Translator()&#10;&#10;def from_english_to_russian(text):&#10;    try:&#10;        result = translator.translate(text, dest='ru')&#10;        return result.text&#10;    except Exception as e:&#10;        print(f&quot;Error translating to Russian: {e}&quot;)&#10;        return text&#10;&#10;def from_russian_to_english(text):&#10;    try:&#10;        result = translator.translate(text, src='ru', dest='en')&#10;        return result.text&#10;    except Exception as e:&#10;        print(f&quot;Error translating to English: {e}&quot;)&#10;        return text&#10;&#10;if __name__ == '__main__':&#10;    print(from_english_to_russian(&quot;Hello, world!&quot;))&#10;    print(from_russian_to_english(&quot;Привет, мир!&quot;))&#10;" />
+              <option name="updatedContent" value="from googletrans import Translator&#10;import asyncio&#10;&#10;translator = Translator()&#10;&#10;async def _translate_async(text, src=None, dest='en'):&#10;    &quot;&quot;&quot;Async helper function for translation&quot;&quot;&quot;&#10;    if src:&#10;        result = await translator.translate(text, src=src, dest=dest)&#10;    else:&#10;        result = await translator.translate(text, dest=dest)&#10;    return result.text&#10;&#10;def _run_async(coro):&#10;    &quot;&quot;&quot;Run async function in sync context&quot;&quot;&quot;&#10;    try:&#10;        loop = asyncio.get_event_loop()&#10;        if loop.is_running():&#10;            # If there's already a running loop, we need to use a different approach&#10;            import concurrent.futures&#10;            import threading&#10;            &#10;            def run_in_thread():&#10;                new_loop = asyncio.new_event_loop()&#10;                try:&#10;                    return new_loop.run_until_complete(coro)&#10;                finally:&#10;                    new_loop.close()&#10;            &#10;            with concurrent.futures.ThreadPoolExecutor() as executor:&#10;                future = executor.submit(run_in_thread)&#10;                return future.result()&#10;        else:&#10;            return loop.run_until_complete(coro)&#10;    except RuntimeError:&#10;        return asyncio.run(coro)&#10;&#10;def from_english_to_russian(text):&#10;    try:&#10;        return _run_async(_translate_async(text, dest='ru'))&#10;    except Exception as e:&#10;        print(f&quot;Error translating to Russian: {e}&quot;)&#10;        return text&#10;&#10;def from_russian_to_english(text):&#10;    try:&#10;        return _run_async(_translate_async(text, src='ru', dest='en'))&#10;    except Exception as e:&#10;        print(f&quot;Error translating to English: {e}&quot;)&#10;        return text&#10;&#10;if __name__ == '__main__':&#10;    print(from_english_to_russian(&quot;Hello, world!&quot;))&#10;    print(from_russian_to_english(&quot;Привет, мир!&quot;))" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
