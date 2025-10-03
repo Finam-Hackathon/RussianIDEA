@@ -3,13 +3,11 @@ import os
 import pika
 import json
 from customers.nlp import RADARFinancialSummarizer
-from general.translator import from_russian_to_english
+from general.translator import from_russian_to_english, from_english_to_russian
 
 client = MongoClient("mongodb+srv://andreydem42_db_user:zrCpoM9uRYBH2jQM@finamhackathon.rs3houu.mongodb.net/")
 db = client["FinamHackathon"]
 collection = db["news"]
-
-summarize = RADARFinancialSummarizer()
 
 url = os.getenv('RABBIT_URL')
 # Название очереди, откуда будем читать данные
@@ -18,6 +16,7 @@ QUEUE_NAME = "news"
 params = pika.URLParameters(url)
 connection = pika.BlockingConnection(params)
 channel = connection.channel()
+summarize = RADARFinancialSummarizer()
 
 channel.queue_declare(queue=QUEUE_NAME, durable=True)
 
@@ -28,8 +27,9 @@ def get_message(data: dict):
     processed_text = summarize.preprocess_text(text)
     english_text = from_russian_to_english(processed_text)
     summary_result = summarize.summarize_news(english_text)
+    russian_summary = from_english_to_russian(summary_result['summary'])
     collection.insert_one({
-        "summary": summary_result['summary'],
+        "summary": russian_summary,
         "link": data['link'],
         "datetime": data['datetime'],
         "title": data['title'],

@@ -33,10 +33,6 @@ def send_json(data):
 # В этой функци работает бизнес-логика продюссера и отправка сообщений
 def produce():
     s = HTMLSession()
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                      '(KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    }
     options = Options()
     options.add_argument("--headless")
     browser = webdriver.Chrome(options=options)
@@ -69,6 +65,8 @@ def produce():
                 continue
             tickers_view = page.find("div", ["symbolsContainer-cBh_FN2P", "logosContainer-cwMMKgmm"])
             text = page.find("div", ["body-KX2tCBZq", "body-pIO_GYwT", "content-pIO_GYwT"]).text
+            if len(text) > 3000:
+                continue
             if tickers_view is not None:
                 text = text.strip(tickers_view.text).strip()
             tickers = list(map(lambda x: x.text, tickers_view.find_all('span',

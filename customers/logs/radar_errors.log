@@ -1,0 +1,126 @@
+2025-10-04 01:31:50 | ERROR | ❌ Неожиданная ошибка: index out of range in self [Время: 0.03с]
+Stacktrace: None
+2025-10-04 01:31:50 | ERROR | Детали неожиданной ошибки:
+Stacktrace: (<class 'IndexError'>, IndexError('index out of range in self'), <traceback object at 0x0000021D028BDCC0>)
+Traceback (most recent call last):
+  File "C:\Users\andrey\main\Python projects\RussianIDEA\customers\nlp.py", line 447, in summarize_news
+    result = self.summarizer(processed_text, **config)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 303, in __call__
+    return super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 191, in __call__
+    result = super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1467, in __call__
+    return self.run_single(inputs, preprocess_params, forward_params, postprocess_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1474, in run_single
+    model_outputs = self.forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1374, in forward
+    model_outputs = self._forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 220, in _forward
+    output_ids = self.model.generate(**model_inputs, **generate_kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 2465, in generate
+    model_kwargs = self._prepare_encoder_decoder_kwargs_for_generation(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 861, in _prepare_encoder_decoder_kwargs_for_generation
+    model_kwargs["encoder_outputs"]: ModelOutput = encoder(**encoder_kwargs)  # type: ignore
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 838, in forward
+    embed_pos = self.embed_positions(input)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 103, in forward
+    return super().forward(position_ids + self.offset)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\sparse.py", line 192, in forward
+    return F.embedding(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\functional.py", line 2546, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+IndexError: index out of range in self
+2025-10-04 01:39:29 | ERROR | ❌ Неожиданная ошибка: index out of range in self [Время: 0.01с]
+Stacktrace: None
+2025-10-04 01:39:29 | ERROR | Детали неожиданной ошибки:
+Stacktrace: (<class 'IndexError'>, IndexError('index out of range in self'), <traceback object at 0x000001E7C75DE400>)
+Traceback (most recent call last):
+  File "C:\Users\andrey\main\Python projects\RussianIDEA\customers\nlp.py", line 438, in summarize_news
+    result = self.summarizer(processed_text, **config)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 303, in __call__
+    return super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 191, in __call__
+    result = super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1467, in __call__
+    return self.run_single(inputs, preprocess_params, forward_params, postprocess_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1474, in run_single
+    model_outputs = self.forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1374, in forward
+    model_outputs = self._forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 220, in _forward
+    output_ids = self.model.generate(**model_inputs, **generate_kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 2465, in generate
+    model_kwargs = self._prepare_encoder_decoder_kwargs_for_generation(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 861, in _prepare_encoder_decoder_kwargs_for_generation
+    model_kwargs["encoder_outputs"]: ModelOutput = encoder(**encoder_kwargs)  # type: ignore
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 838, in forward
+    embed_pos = self.embed_positions(input)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 103, in forward
+    return super().forward(position_ids + self.offset)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\sparse.py", line 192, in forward
+    return F.embedding(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\functional.py", line 2546, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+IndexError: index out of range in self
+2025-10-04 01:40:24 | ERROR | ❌ Неожиданная ошибка: index out of range in self [Время: 0.02с]
+Stacktrace: None
+2025-10-04 01:40:24 | ERROR | Детали неожиданной ошибки:
+Stacktrace: (<class 'IndexError'>, IndexError('index out of range in self'), <traceback object at 0x0000027E782CCD00>)
+Traceback (most recent call last):
+  File "C:\Users\andrey\main\Python projects\RussianIDEA\customers\nlp.py", line 439, in summarize_news
+    result = self.summarizer(processed_text, **config)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 303, in __call__
+    return super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 191, in __call__
+    result = super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1467, in __call__
+    return self.run_single(inputs, preprocess_params, forward_params, postprocess_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1474, in run_single
+    model_outputs = self.forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1374, in forward
+    model_outputs = self._forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 220, in _forward
+    output_ids = self.model.generate(**model_inputs, **generate_kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 2465, in generate
+    model_kwargs = self._prepare_encoder_decoder_kwargs_for_generation(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 861, in _prepare_encoder_decoder_kwargs_for_generation
+    model_kwargs["encoder_outputs"]: ModelOutput = encoder(**encoder_kwargs)  # type: ignore
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 838, in forward
+    embed_pos = self.embed_positions(input)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 103, in forward
+    return super().forward(position_ids + self.offset)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\sparse.py", line 192, in forward
+    return F.embedding(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\functional.py", line 2546, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+IndexError: index out of range in self

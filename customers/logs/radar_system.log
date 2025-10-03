@@ -34,3 +34,287 @@
 2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
 2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
 2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 01:25:28 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 01:26:08 | RADARFinancialSummarizer  | INFO     | ✅ Модель загружена за 39.8 секунд
+2025-10-04 01:26:10 | RADARFinancialSummarizer  | INFO     | 🧪 Тестовая суммаризация прошла успешно
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 01:28:32 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 01:28:34 | RADARFinancialSummarizer  | INFO     | ✅ Модель загружена за 1.4 секунд
+2025-10-04 01:28:36 | RADARFinancialSummarizer  | INFO     | 🧪 Тестовая суммаризация прошла успешно
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 01:29:50 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 01:29:51 | RADARFinancialSummarizer  | INFO     | ✅ Модель загружена за 1.4 секунд
+2025-10-04 01:29:54 | RADARFinancialSummarizer  | INFO     | 🧪 Тестовая суммаризация прошла успешно
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 01:31:40 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 01:31:42 | RADARFinancialSummarizer  | INFO     | ✅ Модель загружена за 1.4 секунд
+2025-10-04 01:31:44 | RADARFinancialSummarizer  | INFO     | 🧪 Тестовая суммаризация прошла успешно
+2025-10-04 01:31:46 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1139 символов
+2025-10-04 01:31:49 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 7.2x, Кэш: miss, Время: 2.86с
+2025-10-04 01:31:50 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 3575 символов
+2025-10-04 01:31:50 | RADARFinancialSummarizer  | ERROR    | ❌ Неожиданная ошибка: index out of range in self [Время: 0.03с]
+2025-10-04 01:31:50 | RADARFinancialSummarizer  | ERROR    | Детали неожиданной ошибки:
+Traceback (most recent call last):
+  File "C:\Users\andrey\main\Python projects\RussianIDEA\customers\nlp.py", line 447, in summarize_news
+    result = self.summarizer(processed_text, **config)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 303, in __call__
+    return super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 191, in __call__
+    result = super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1467, in __call__
+    return self.run_single(inputs, preprocess_params, forward_params, postprocess_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1474, in run_single
+    model_outputs = self.forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1374, in forward
+    model_outputs = self._forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 220, in _forward
+    output_ids = self.model.generate(**model_inputs, **generate_kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 2465, in generate
+    model_kwargs = self._prepare_encoder_decoder_kwargs_for_generation(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 861, in _prepare_encoder_decoder_kwargs_for_generation
+    model_kwargs["encoder_outputs"]: ModelOutput = encoder(**encoder_kwargs)  # type: ignore
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 838, in forward
+    embed_pos = self.embed_positions(input)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 103, in forward
+    return super().forward(position_ids + self.offset)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\sparse.py", line 192, in forward
+    return F.embedding(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\functional.py", line 2546, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+IndexError: index out of range in self
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 01:39:24 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 01:39:25 | RADARFinancialSummarizer  | INFO     | ✅ Модель загружена за 1.4 секунд
+2025-10-04 01:39:27 | RADARFinancialSummarizer  | INFO     | 🧪 Тестовая суммаризация прошла успешно
+2025-10-04 01:39:29 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 3575 символов
+2025-10-04 01:39:29 | RADARFinancialSummarizer  | ERROR    | ❌ Неожиданная ошибка: index out of range in self [Время: 0.01с]
+2025-10-04 01:39:29 | RADARFinancialSummarizer  | ERROR    | Детали неожиданной ошибки:
+Traceback (most recent call last):
+  File "C:\Users\andrey\main\Python projects\RussianIDEA\customers\nlp.py", line 438, in summarize_news
+    result = self.summarizer(processed_text, **config)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 303, in __call__
+    return super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 191, in __call__
+    result = super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1467, in __call__
+    return self.run_single(inputs, preprocess_params, forward_params, postprocess_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1474, in run_single
+    model_outputs = self.forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1374, in forward
+    model_outputs = self._forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 220, in _forward
+    output_ids = self.model.generate(**model_inputs, **generate_kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 2465, in generate
+    model_kwargs = self._prepare_encoder_decoder_kwargs_for_generation(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 861, in _prepare_encoder_decoder_kwargs_for_generation
+    model_kwargs["encoder_outputs"]: ModelOutput = encoder(**encoder_kwargs)  # type: ignore
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 838, in forward
+    embed_pos = self.embed_positions(input)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 103, in forward
+    return super().forward(position_ids + self.offset)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\sparse.py", line 192, in forward
+    return F.embedding(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\functional.py", line 2546, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+IndexError: index out of range in self
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 01:40:19 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 01:40:20 | RADARFinancialSummarizer  | INFO     | ✅ Модель загружена за 1.4 секунд
+2025-10-04 01:40:22 | RADARFinancialSummarizer  | INFO     | 🧪 Тестовая суммаризация прошла успешно
+2025-10-04 01:40:24 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 3575 символов
+2025-10-04 01:40:24 | RADARFinancialSummarizer  | ERROR    | ❌ Неожиданная ошибка: index out of range in self [Время: 0.02с]
+2025-10-04 01:40:24 | RADARFinancialSummarizer  | ERROR    | Детали неожиданной ошибки:
+Traceback (most recent call last):
+  File "C:\Users\andrey\main\Python projects\RussianIDEA\customers\nlp.py", line 439, in summarize_news
+    result = self.summarizer(processed_text, **config)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 303, in __call__
+    return super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 191, in __call__
+    result = super().__call__(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1467, in __call__
+    return self.run_single(inputs, preprocess_params, forward_params, postprocess_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1474, in run_single
+    model_outputs = self.forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\base.py", line 1374, in forward
+    model_outputs = self._forward(model_inputs, **forward_params)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\pipelines\text2text_generation.py", line 220, in _forward
+    output_ids = self.model.generate(**model_inputs, **generate_kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 2465, in generate
+    model_kwargs = self._prepare_encoder_decoder_kwargs_for_generation(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\generation\utils.py", line 861, in _prepare_encoder_decoder_kwargs_for_generation
+    model_kwargs["encoder_outputs"]: ModelOutput = encoder(**encoder_kwargs)  # type: ignore
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 838, in forward
+    embed_pos = self.embed_positions(input)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\models\bart\modeling_bart.py", line 103, in forward
+    return super().forward(position_ids + self.offset)
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\modules\sparse.py", line 192, in forward
+    return F.embedding(
+  File "C:\Users\andrey\AppData\Local\Programs\Python\Python310\lib\site-packages\torch\nn\functional.py", line 2546, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+IndexError: index out of range in self
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 02:16:19 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 02:16:20 | RADARFinancialSummarizer  | INFO     | ✅ Модель загружена за 1.4 секунд
+2025-10-04 02:16:23 | RADARFinancialSummarizer  | INFO     | 🧪 Тестовая суммаризация прошла успешно
+2025-10-04 02:16:23 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1139 символов
+2025-10-04 02:16:26 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 7.2x, Кэш: miss, Время: 2.70с
+2025-10-04 02:16:27 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 2015 символов
+2025-10-04 02:16:32 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 10.0x, Кэш: miss, Время: 4.23с
+2025-10-04 02:16:33 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 376 символов
+2025-10-04 02:16:35 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 3.1x, Кэш: miss, Время: 2.15с
+2025-10-04 02:16:37 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 2037 символов
+2025-10-04 02:16:40 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 12.9x, Кэш: miss, Время: 3.26с
+2025-10-04 02:16:41 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 672 символов
+2025-10-04 02:16:44 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 3.3x, Кэш: miss, Время: 3.21с
+2025-10-04 02:16:46 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 402 символов
+2025-10-04 02:16:48 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 6.9x, Кэш: miss, Время: 1.90с
+2025-10-04 02:16:50 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1378 символов
+2025-10-04 02:16:52 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 12.0x, Кэш: miss, Время: 2.90с
+2025-10-04 02:16:54 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1756 символов
+2025-10-04 02:16:58 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 11.8x, Кэш: miss, Время: 3.45с
+2025-10-04 02:16:59 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1175 символов
+2025-10-04 02:17:02 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 7.9x, Кэш: miss, Время: 2.96с
+2025-10-04 02:17:05 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 628 символов
+2025-10-04 02:17:07 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 5.4x, Кэш: miss, Время: 2.74с
+2025-10-04 02:17:09 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 2210 символов
+2025-10-04 02:17:13 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 16.2x, Кэш: miss, Время: 3.41с
+2025-10-04 02:17:14 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1460 символов
+2025-10-04 02:17:17 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 8.8x, Кэш: miss, Время: 3.15с
+2025-10-04 02:17:19 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 556 символов
+2025-10-04 02:17:21 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 3.7x, Кэш: miss, Время: 2.33с
+2025-10-04 02:17:24 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1670 символов
+2025-10-04 02:17:26 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 16.1x, Кэш: miss, Время: 2.98с
+2025-10-04 02:17:28 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 732 символов
+2025-10-04 02:17:32 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 2.5x, Кэш: miss, Время: 4.21с
+2025-10-04 02:17:33 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1621 символов
+2025-10-04 02:17:38 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 4.6x, Кэш: miss, Время: 4.88с
+2025-10-04 02:17:39 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 449 символов
+2025-10-04 02:17:42 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 3.2x, Кэш: miss, Время: 2.37с
+2025-10-04 02:17:43 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 395 символов
+2025-10-04 02:17:45 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 2.2x, Кэш: miss, Время: 2.27с
+2025-10-04 02:17:47 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1137 символов
+2025-10-04 02:17:50 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 9.3x, Кэш: miss, Время: 2.93с
+2025-10-04 02:17:51 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 420 символов
+2025-10-04 02:17:53 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 3.2x, Кэш: miss, Время: 2.20с
+2025-10-04 02:17:55 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 674 символов
+2025-10-04 02:17:59 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 2.7x, Кэш: miss, Время: 3.54с
+2025-10-04 02:18:00 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 675 символов
+2025-10-04 02:18:05 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 2.4x, Кэш: miss, Время: 4.14с
+2025-10-04 02:18:07 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1785 символов
+2025-10-04 02:18:10 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 11.2x, Кэш: miss, Время: 3.01с
+2025-10-04 02:18:11 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 670 символов
+2025-10-04 02:18:14 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 3.7x, Кэш: miss, Время: 3.26с
+2025-10-04 02:18:16 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 733 символов
+2025-10-04 02:18:18 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 5.5x, Кэш: miss, Время: 2.48с
+2025-10-04 02:18:20 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 475 символов
+2025-10-04 02:18:22 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 3.8x, Кэш: miss, Время: 2.14с
+2025-10-04 02:18:23 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1500 символов
+2025-10-04 02:18:28 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 5.2x, Кэш: miss, Время: 4.41с
+2025-10-04 02:18:29 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 2003 символов
+2025-10-04 02:18:35 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 7.1x, Кэш: miss, Время: 5.59с
+2025-10-04 02:18:37 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1605 символов
+2025-10-04 02:18:42 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 4.4x, Кэш: miss, Время: 5.15с
+2025-10-04 02:18:43 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1751 символов
+2025-10-04 02:18:47 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 10.0x, Кэш: miss, Время: 3.54с
+2025-10-04 02:18:49 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1713 символов
+2025-10-04 02:18:54 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 9.7x, Кэш: miss, Время: 5.42с
+2025-10-04 02:18:56 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 503 символов
+2025-10-04 02:18:59 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 2.3x, Кэш: miss, Время: 3.09с
+2025-10-04 02:19:01 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1372 символов
+2025-10-04 02:19:06 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 6.1x, Кэш: miss, Время: 4.93с
+2025-10-04 02:19:08 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 637 символов
+2025-10-04 02:19:10 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 4.8x, Кэш: miss, Время: 2.39с
+2025-10-04 02:19:12 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 334 символов
+2025-10-04 02:19:15 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Хорошо, Сжатие: 1.6x, Кэш: miss, Время: 3.40с
+2025-10-04 02:19:17 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 613 символов
+2025-10-04 02:19:20 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 3.9x, Кэш: miss, Время: 2.64с
+2025-10-04 02:19:21 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 1436 символов
+2025-10-04 02:19:24 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 9.8x, Кэш: miss, Время: 3.17с
+2025-10-04 02:19:26 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 746 символов
+2025-10-04 02:19:30 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 4.1x, Кэш: miss, Время: 3.62с
+2025-10-04 02:19:32 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 997 символов
+2025-10-04 02:19:36 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 4.0x, Кэш: miss, Время: 4.31с
+2025-10-04 02:19:39 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 579 символов
+2025-10-04 02:19:41 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ✅ Отлично, Сжатие: 3.3x, Кэш: miss, Время: 2.51с
+2025-10-04 02:19:42 | RADARFinancialSummarizer  | INFO     | 🚀 Начата суммаризация текста длиной 2244 символов
+2025-10-04 02:19:48 | RADARFinancialSummarizer  | INFO     | ✅ Суммаризация завершена. Качество: ⚠️ Можно короче, Сжатие: 12.0x, Кэш: miss, Время: 5.47с
