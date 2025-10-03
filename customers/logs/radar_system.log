@@ -1,0 +1,36 @@
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 00:23:01 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 00:31:34 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 00:35:36 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🚀 RADAR Financial Summarizer Started
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | ==================================================
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | ⚡ Используется CPU (ядер: 12)
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🔄 Загрузка модели facebook/bart-large-cnn...
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | ⚙️ Устройство: cpu
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🐍 Python: 3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🔥 PyTorch: 2.8.0+cpu
+2025-10-04 00:36:14 | RADARFinancialSummarizer  | INFO     | 🤗 Transformers: 4.57.0
