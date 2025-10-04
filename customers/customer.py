@@ -63,7 +63,7 @@ def get_message(data: dict): # see line 55 in trading_view_producer.py
     #         "sectors": [string],
     #         "currencies": [string],
     #     },
-    #     "datetime": datetime, - из data
+    #     "datetime": datetime, - из data (только она приходит строкой, нужно перевести в datetime)
     #     "link": string, - из data
     # }
     #
