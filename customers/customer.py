@@ -22,7 +22,7 @@ channel.queue_declare(queue=QUEUE_NAME, durable=True)
 
 
 # Здесь бизнес-логика клиента. Эта функция будет вызываться всякий раз, когда RabbitMQ готов получить сообщение.
-def get_message(data: dict):
+def get_message(data: dict): # see line 55 in trading_view_producer.py
     text = data['text']
     processed_text = summarize.preprocess_text(text)
     english_text = from_russian_to_english(processed_text)

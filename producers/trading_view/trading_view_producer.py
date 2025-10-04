@@ -1,3 +1,5 @@
+import time
+
 from bs4 import BeautifulSoup
 from datetime import datetime
 from selenium import webdriver
@@ -19,7 +21,7 @@ connection = pika.BlockingConnection(params)
 channel = connection.channel()
 
 channel.queue_declare(queue=QUEUE_NAME, durable=True)
-
+s = HTMLSession()
 
 def send_json(data):
     channel.basic_publish(
@@ -29,10 +31,42 @@ def send_json(data):
         properties=pika.BasicProperties(delivery_mode=2)
     )
 
+def parse_page(page_link):
+    r = s.get(f'https://ru.tradingview.com{page_link}')
+    r.html.render()
+    page = BeautifulSoup(r.content, 'html.parser')
+    news_datetime = datetime.fromtimestamp(int(page.find("time-format").get('timestamp')) / 1000, tz=TIMEZONE)
+    if not in_period(news_datetime):
+        return False
+    try:
+        title = page.find("h1", {"data-qa-id": "news-description-title"}).text
+    except AttributeError:
+        return True
+    tickers_view = page.find("div", ["symbolsContainer-cBh_FN2P", "logosContainer-cwMMKgmm"])
+    text = page.find("div", ["body-KX2tCBZq", "body-pIO_GYwT", "content-pIO_GYwT"]).text
+    if len(text) > 3000:
+        return True
+    if tickers_view is not None:
+        text = text.strip(tickers_view.text).strip()
+    tickers = list(map(lambda x: x.text, tickers_view.find_all('span',
+                                                               ['description-cBh_FN2P']))) if tickers_view is not None else []
+    tags_view = page.find("div", {"class": "rowTagsDefault-TeKDWl75"})
+    tags = list(map(lambda x: x.text, tags_view.find_all('a')))
+    data = {
+        'producer': 'TradingView',
+        'title': title,
+        'text': text,
+        'tags': tags, # list
+        'tickers': tickers, # list
+        'companies': [], # list
+        'link': f'https://ru.tradingview.com{page_link}',
+        'datetime': news_datetime.strftime("%d.%m.%Y %H:%M") # string
+    }
+    send_json(json.dumps(data))
+    return True
 
 # В этой функци работает бизнес-логика продюссера и отправка сообщений
 def produce():
-    s = HTMLSession()
     options = Options()
     options.add_argument("--headless")
     browser = webdriver.Chrome(options=options)
@@ -52,40 +86,17 @@ def produce():
                 continue
             last_index = data_index
             page_link = link.get('href')
-            r = s.get(f'https://ru.tradingview.com{page_link}')
-            r.html.render()
-            page = BeautifulSoup(r.content, 'html.parser')
-            news_datetime = datetime.fromtimestamp(int(page.find("time-format").get('timestamp')) / 1000, tz=TIMEZONE)
-            if not in_period(news_datetime):
-                running = False
-                break
-            try:
-                title = page.find("h1", {"data-qa-id": "news-description-title"}).text
-            except AttributeError:
-                continue
-            tickers_view = page.find("div", ["symbolsContainer-cBh_FN2P", "logosContainer-cwMMKgmm"])
-            text = page.find("div", ["body-KX2tCBZq", "body-pIO_GYwT", "content-pIO_GYwT"]).text
-            if len(text) > 3000:
-                continue
-            if tickers_view is not None:
-                text = text.strip(tickers_view.text).strip()
-            tickers = list(map(lambda x: x.text, tickers_view.find_all('span',
-                                                                       ['description-cBh_FN2P']))) if tickers_view is not None else []
-            tags_view = page.find("div", {"class": "rowTagsDefault-TeKDWl75"})
-            tags = list(map(lambda x: x.text, tags_view.find_all('a')))
-            data = {
-                'producer': 'TradingView',
-                'title': title,
-                'text': text,
-                'tags': tags,
-                'tickers': tickers,
-                'companies': [],
-                'link': f'https://ru.tradingview.com{page_link}',
-                'datetime': news_datetime.strftime("%d.%m.%Y %H:%M")
-            }
-            send_json(json.dumps(data))
+            running = parse_page(page_link)
         scrolled += 100
         browser.execute_script("arguments[0].scrollTop = arguments[1]", scroll_view, scrolled)
+    browser.execute_script("arguments[0].scrollTop = arguments[1]", scroll_view, 0)
+    last_news_link = ''
+    while True:
+        first_link = BeautifulSoup(browser.page_source, 'html.parser').find('a', {'data-index': '0'}).get('href')
+        if first_link != last_news_link:
+            parse_page(first_link)
+        last_news_link = first_link
+        time.sleep(1)
 
 
 produce()
