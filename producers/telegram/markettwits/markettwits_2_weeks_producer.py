@@ -228,10 +228,15 @@ class EnhancedTelegramParser:
 
                 crypto_tickers = {'BTC', 'ETH', 'SOL', 'USDT', 'USDC', 'DOGE', 'BNB', 'TON'}
                 crypto_tags = {'крипто', 'crypto', 'bitcoin', 'эфириум', 'ethereum'}
+                day_tags = {'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье'}
 
-                if (not any(tag in crypto_tags for tag in message_data.get('tags', [])) and
-                        not any(ticker in crypto_tickers for ticker in message_data.get('tickers', []))):
-                    messages_data.append(message_data)
+                if (len(message_data.get('tags', [])) > 0 or
+                        len(message_data.get('tickers', [])) > 0):
+                    if (not any(tag in crypto_tags for tag in message_data.get('tags', [])) and
+                            not any(tag in day_tags for tag in message_data.get('tags', [])) and
+                            not any(ticker in crypto_tickers for ticker in message_data.get('tickers', []))):
+                        if message_data['text'] != '' and "Bogdanoff Market Research" not in message_data['text']:
+                            messages_data.append(message_data)
 
 
             except Exception as e:
