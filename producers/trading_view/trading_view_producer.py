@@ -59,7 +59,7 @@ def parse_page(page_link):
         'tags': tags, # list
         'tickers': tickers, # list
         'companies': [], # list
-        'link': f'https://ru.tradingview.com{page_link}',
+        'links': [f'https://ru.tradingview.com{page_link}'],
         'datetime': news_datetime.strftime("%d.%m.%Y %H:%M") # string
     }
     send_json(json.dumps(data))

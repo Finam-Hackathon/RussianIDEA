@@ -35,7 +35,7 @@ data = {
         "currencies": ['USD'],
     },
     "datetime": datetime(2024, 5, 30, 9, 12),
-    "link": "https://catscaptureworld.com",
+    "links": ["https://catscaptureworld.com", 'http://meowmeow.com'],
 }
 
 collection.insert_one(data)
