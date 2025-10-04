@@ -199,7 +199,7 @@ if __name__ == "__main__":
             'tags': [],
             'tickers': [],
             'companies': companies,
-            'link': news[0]['link'],
+            'links': [news[0]['link']],
             'datetime': simple_date_convert(news[0]['date'])
         }
 
