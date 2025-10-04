@@ -44,8 +44,6 @@ def parse_page(page_link):
         return True
     tickers_view = page.find("div", ["symbolsContainer-cBh_FN2P", "logosContainer-cwMMKgmm"])
     text = page.find("div", ["body-KX2tCBZq", "body-pIO_GYwT", "content-pIO_GYwT"]).text
-    if len(text) > 3000:
-        return True
     if tickers_view is not None:
         text = text.strip(tickers_view.text).strip()
     tickers = list(map(lambda x: x.text, tickers_view.find_all('span',
@@ -62,6 +60,7 @@ def parse_page(page_link):
         'links': [f'https://ru.tradingview.com{page_link}'],
         'datetime': news_datetime.strftime("%d.%m.%Y %H:%M") # string
     }
+    print(data)
     send_json(json.dumps(data))
     return True
 

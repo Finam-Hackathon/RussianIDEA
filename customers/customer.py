@@ -2,8 +2,8 @@ from pymongo import MongoClient
 import os
 import pika
 import json
-from customers.nlp import RADARFinancialSummarizer
-from general.translator import from_russian_to_english, from_english_to_russian
+from customers.nlp import process_single_text
+from datetime import datetime
 
 client = MongoClient("mongodb+srv://andreydem42_db_user:zrCpoM9uRYBH2jQM@finamhackathon.rs3houu.mongodb.net/")
 db = client["FinamHackathon"]
@@ -16,7 +16,6 @@ QUEUE_NAME = "news"
 params = pika.URLParameters(url)
 connection = pika.BlockingConnection(params)
 channel = connection.channel()
-summarize = RADARFinancialSummarizer()
 
 channel.queue_declare(queue=QUEUE_NAME, durable=True)
 
@@ -24,18 +23,16 @@ channel.queue_declare(queue=QUEUE_NAME, durable=True)
 # Здесь бизнес-логика клиента. Эта функция будет вызываться всякий раз, когда RabbitMQ готов получить сообщение.
 def get_message(data: dict): # see line 55 in trading_view_producer.py
     text = data['text']
-    processed_text = summarize.preprocess_text(text)
-    english_text = from_russian_to_english(processed_text)
-    summary_result = summarize.summarize_news(english_text)
-    russian_summary = from_english_to_russian(summary_result['summary'])
-    collection.insert_one({
-        "summary": russian_summary,
-        "link": data['link'],
-        "datetime": data['datetime'],
-        "title": data['title'],
-        "tags": data['tags'],
-        "tickers": data['tickers']
-    })
+    result = process_single_text(text)
+    result['datetime'] = datetime.strptime(data['datetime'], "%d.%m.%Y %H:%M")
+    result['links'] = data['links']
+    companies = set(data['companies'])
+    companies.update(result['entities']['companies'])
+    tickers = set(data['tickers'])
+    tickers.update(result['entities']['tickers'])
+    result['entities']['companies'] = list(companies)
+    result['entities']['tickers'] = list(tickers)
+    collection.insert_one(result)
 
     # давай вот такой json
     # {
