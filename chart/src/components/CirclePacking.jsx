@@ -99,7 +99,7 @@ export default function CirclePacking({ width = 900, height = 700, padding = 4, 
       .attr('dy', '1.5rem')
       .text((d) => {
         const cnt = d.data?.count ?? 0
-        return `Всего ${cnt}`
+        return ``
       })
       .attr('fill', '#222')
       .style('font-weight', 400)
