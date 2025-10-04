@@ -1,7 +1,8 @@
+import os
 from datetime import datetime
 from pymongo import MongoClient
 
-client = MongoClient("mongodb+srv://andreydem42_db_user:zrCpoM9uRYBH2jQM@finamhackathon.rs3houu.mongodb.net/")
+client = MongoClient(os.getenv("MONGO"))
 db = client["FinamHackathon"]
 collection = db["news"]
 
@@ -38,4 +39,14 @@ data = {
     "links": ["https://catscaptureworld.com", 'http://meowmeow.com'],
 }
 
-collection.insert_one(data)
+collection.insert_one({
+    "sentiment_score": -0.5,
+    "hottness": {
+        "score": 0.2
+    },
+    "entities": {
+        'companies': ['МВФ', 'ЕБРР'],
+        'tickers': ['AAPL']
+    }
+})
+# collection.insert_one(data)

@@ -11,7 +11,7 @@ from general.settings import TIMEZONE
 TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN, parse_mode='MARKDOWNV2')
 
-client = MongoClient("mongodb+srv://andreydem42_db_user:zrCpoM9uRYBH2jQM@finamhackathon.rs3houu.mongodb.net/")
+client = MongoClient(os.getenv('MONGO'))
 db = client["FinamHackathon"]
 collection = db["news"]
 
@@ -140,7 +140,7 @@ def escape_markdown_v2(text):
 
 def build_message(r):
     fires = math.ceil(r['hottness']['score'] * 10)
-    sentiment_emojy = ['😡', '😟', '😐', '😊', '🤩', '🤩'][math.floor(r['sentiment_score'] * 5)]
+    sentiment_emojy = ['😡', '😟', '😐', '😊', '🤩', '🤩'][math.floor((r['sentiment_score'] + 1) * 5 / 2)]
     title = escape_markdown_v2(r['title'].upper())
     datetime_text = escape_markdown_v2(r['datetime'].strftime('%d.%m.%Y %H:%M'))
     lead = escape_markdown_v2(r['lead'])

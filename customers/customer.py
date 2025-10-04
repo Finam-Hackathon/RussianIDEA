@@ -5,7 +5,7 @@ import json
 from customers.nlp import process_single_text
 from datetime import datetime
 
-client = MongoClient("mongodb+srv://andreydem42_db_user:zrCpoM9uRYBH2jQM@finamhackathon.rs3houu.mongodb.net/")
+client = MongoClient(os.getenv("MONGO"))
 db = client["FinamHackathon"]
 collection = db["news"]
 
@@ -32,6 +32,7 @@ def get_message(data: dict): # see line 55 in trading_view_producer.py
     tickers.update(result['entities']['tickers'])
     result['entities']['companies'] = list(companies)
     result['entities']['tickers'] = list(tickers)
+    del result['parsed_content']
     collection.insert_one(result)
 
     # давай вот такой json

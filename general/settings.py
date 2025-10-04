@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytz
 
-DAYS_TO_EXPIRE = 1
+DAYS_TO_EXPIRE = 2
 TIMEZONE = pytz.timezone('Europe/Moscow')
 
 def in_period(target):
