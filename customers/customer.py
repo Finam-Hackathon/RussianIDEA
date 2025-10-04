@@ -37,6 +37,38 @@ def get_message(data: dict): # see line 55 in trading_view_producer.py
         "tickers": data['tickers']
     })
 
+    # давай вот такой json
+    # {
+    #     "topic": string, - ТЕМА
+    #     "draft": {
+    #       "title": string, - ЗАГОЛОВОК
+    #       "lead": string, - ЛИД
+    #       "points": [string], - КЛЮЧЕВЫЕ ПУНКТЫ
+    #     },
+    #     "sentiment": float, - СЕНТИМЕНТ
+    #     "hotness": float, - ГОРЯЧЕСТЬ
+    #     "why_hot": string, - Причина
+    #     "why_now": string, - ПОЧЕМУ СЕЙЧАС
+    #     "impact_analysis": string, - АНАЛИЗ ВЛИЯНИЯ
+    #     "statistics": {
+    #         "compression": float, - СЖАТИЕ
+    #         "quality": float, - Качество
+    #         "processing_started": datetime, - Обработка начата
+    #         "processing_ended": datetime, - Обработка завершена
+    #     },
+    #     "entities": {
+    #         "companies": [string], - дополняем из data
+    #         "tickers": [string], - дополняем из data
+    #         "countries": [string],
+    #         "sectors": [string],
+    #         "currencies": [string],
+    #     },
+    #     "datetime": datetime, - из data
+    #     "link": string, - из data
+    # }
+    #
+    # если текст короткий (<500 символов), тогда не делаем lead, statistics, points
+
 
 def callback(ch, method, properties, body):
     get_message(json.loads(body.decode()))
