@@ -1,1019 +1,1044 @@
-from transformers import pipeline
-import torch
-import re
-from typing import Dict
-import logging
-import os
+import requests
+import json
 import time
-import sys
-import transformers
-import datetime
-import hashlib
-from functools import lru_cache
-from typing import Dict, Optional
+import os
+import re
+from datetime import datetime
+from typing import Optional, Dict, Any, List
+from dotenv import load_dotenv
+
+# Загружаем переменные окружения
+load_dotenv()
 
 
-
-# Глобальные метрики для мониторинга (добавьте в начало файла)
-_SUMMARIZATION_METRICS = {
-    'requests_total': 0,
-    'errors_total': 0,
-    'processing_times': [],
-    'last_reset': datetime.datetime.now()
-}
-
-
-def _get_text_hash(text: str) -> str:
-    """Генерация хеша текста для кэширования"""
-    return hashlib.md5(text.encode()).hexdigest()
-
-
-@lru_cache(maxsize=100)
-def _cached_summarization(text_hash: str, config_key: str, config_params: tuple) -> str:
+class OpenRouterClient:
     """
-    Кэшированная суммаризация на основе хеша текста и конфигурации
-    """
-    # В реальной реализации здесь будет вызов модели
-    # Пока возвращаем заглушку, которая будет заменена реальным результатом
-    return f"Кэшированная суммаризация для конфига {config_key}"
-
-
-def _record_metrics(success: bool = True, processing_time: float = 0.0):
-    """
-    Запись метрик производительности
-    """
-    global _SUMMARIZATION_METRICS
-
-    _SUMMARIZATION_METRICS['requests_total'] += 1
-
-    if success:
-        _SUMMARIZATION_METRICS['processing_times'].append(processing_time)
-    else:
-        _SUMMARIZATION_METRICS['errors_total'] += 1
-
-
-# Дополнительные утилиты для мониторинга (можно добавить в класс как статические методы)
-def get_summarization_metrics() -> Dict:
-    """Получение текущих метрик суммаризации"""
-    global _SUMMARIZATION_METRICS
-
-    times = _SUMMARIZATION_METRICS['processing_times']
-    total_requests = _SUMMARIZATION_METRICS['requests_total']
-
-    avg_time = sum(times) / len(times) if times else 0
-    error_rate = (_SUMMARIZATION_METRICS['errors_total'] / total_requests * 100) if total_requests > 0 else 0
-
-    return {
-        'total_requests': total_requests,
-        'total_errors': _SUMMARIZATION_METRICS['errors_total'],
-        'error_rate_percent': round(error_rate, 2),
-        'avg_processing_time_seconds': round(avg_time, 2),
-        'performance_benchmark': 'good' if avg_time < 2.0 else 'needs_optimization'
-    }
-
-
-def clear_summarization_cache():
-    """Очистка кэша суммаризации"""
-    _cached_summarization.cache_clear()
-    logging.getLogger('RADARFinancialSummarizer').info("🧹 Кэш суммаризации очищен")
-
-
-def get_cache_info() -> Dict:
-    """Получение информации о кэше"""
-    cache_info = _cached_summarization.cache_info()
-    return {
-        'cache_hits': cache_info.hits,
-        'cache_misses': cache_info.misses,
-        'cache_size': cache_info.currsize,
-        'cache_max_size': cache_info.maxsize
-    }
-
-class RADARFinancialSummarizer:
-    """
-    ФИНАЛЬНАЯ ГОТОВАЯ СИСТЕМА для финансовых новостей RADAR
+    Клиент для работы с OpenRouter API
     """
 
-    def __init__(self, device: str = "auto", debug_mode: bool = False):
-        self.setup_logging()
-        self.device = self._setup_device(device)
-        self.model_name = "facebook/bart-large-cnn"
-        self.debug_mode = debug_mode  # Добавьте эту строку
+    def __init__(self, api_key: Optional[str] = None, model: str = "openai/gpt-4o"):
+        """
+        Инициализация клиента
+        """
+        self.api_key = api_key or os.getenv('OPENROUTER_API_KEY')
+        if not self.api_key:
+            raise ValueError("API ключ не найден. Укажите в .env файле или передайте в конструктор")
 
-        self.model_kwargs = {
-            'low_cpu_mem_usage': True,
-            'torchscript': True,  # 🚀 Ускорение инференса
-            'use_cache': True,  # 📝 Кэширование внимания
+        self.model = model
+        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.default_headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
         }
 
-        # 🎯 ФИНАЛЬНЫЕ ОПТИМАЛЬНЫЕ НАСТРОЙКИ
-        self.configs = {
-            "EARNINGS": {'max_length': 50, 'min_length': 25, 'length_penalty': 1.6, 'num_beams': 4, 'early_stopping': True, },
-            "CENTRAL_BANK": {'max_length': 35, 'min_length': 18, 'length_penalty': 2.1, 'num_beams': 4, 'early_stopping': True,},
-            "MARKET": {'max_length': 30, 'min_length': 15, 'length_penalty': 2.0, 'num_beams': 4, 'early_stopping': True, },
-            "MERGERS": {'max_length': 70, 'min_length': 35, 'length_penalty': 1.7, 'num_beams': 4, 'early_stopping': True,},
-            "REGULATORY": {'max_length': 60, 'min_length': 30, 'length_penalty': 2.0, 'num_beams': 4, 'early_stopping': True,},
-            "ECONOMIC": {'max_length': 55, 'min_length': 28, 'length_penalty': 1.9, 'num_beams': 4, 'early_stopping': True,},
-            "TECHNOLOGY": {'max_length': 65, 'min_length': 32, 'length_penalty': 1.8, 'num_beams': 4, 'early_stopping': True,},
-            "COMMODITIES": {'max_length': 50, 'min_length': 25, 'length_penalty': 2.0, 'num_beams': 4, 'early_stopping': True,},
-            "GENERAL_FINANCIAL": {'max_length': 60, 'min_length': 30, 'length_penalty': 2.0, 'num_beams': 4, 'early_stopping': True,},
+    def _make_request(
+            self,
+            messages: List[Dict[str, str]],
+            model: str = "openai/gpt-4o",
+            max_tokens: int = 1500,
+            temperature: float = 0.7,
+            max_retries: int = 3,
+            timeout: int = 30
+    ) -> Dict[str, Any]:
+        """
+        Базовый метод для отправки запросов к API
+        """
+        payload = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
         }
 
-        self.setup_model()
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(
+                    url=self.base_url,
+                    headers=self.default_headers,
+                    json=payload,
+                    timeout=timeout
+                )
 
-    def _get_adaptive_config(self, text: str, news_type: str) -> Dict:
-        """Адаптивная настройка параметров на основе длины текста"""
-        base_config = self.configs.get(news_type, self.configs["GENERAL_FINANCIAL"]).copy()
+                if response.status_code == 200:
+                    data = response.json()
 
-        # Рассчитываем оптимальные длины на основе количества слов
-        words = text.split()
-        word_count = len(words)
+                    if ('choices' in data and len(data['choices']) > 0 and
+                            'message' in data['choices'][0] and
+                            'content' in data['choices'][0]['message']):
 
-        # Адаптивная настройка max_length и min_length
-        if word_count < 30:
-            base_config['max_length'] = max(15, word_count // 2)
-            base_config['min_length'] = max(8, word_count // 3)
-        elif word_count > 200:
-            base_config['max_length'] = min(60, base_config['max_length'])
-            base_config['min_length'] = min(30, base_config['min_length'])
-
-        # Для CPU уменьшаем num_beams для скорости
-        if self.device == "cpu":
-            base_config['num_beams'] = 2  # Быстрее чем 4
-
-        return base_config
-
-    def _setup_device(self, device: str) -> str:
-        """
-        Продвинутое определение устройства с оптимизацией
-        """
-        try:
-            if device == "auto":
-                # Приоритет 1: CUDA с проверкой памяти
-                if torch.cuda.is_available():
-                    gpu_name = torch.cuda.get_device_name(0)
-                    gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
-
-                    self.logger.info(f"🎮 Обнаружен GPU: {gpu_name} ({gpu_memory:.1f}GB)")
-
-                    # Проверка достаточности памяти для BART-large
-                    if gpu_memory >= 4.0:  # Минимум 4GB для комфортной работы
-                        return "cuda"
+                        return {
+                            "success": True,
+                            "content": data['choices'][0]['message']['content'],
+                            "model": data.get('model', 'unknown'),
+                            "usage": data.get('usage', {}),
+                            "full_response": data
+                        }
                     else:
-                        self.logger.warning(f"⚠️ GPU память {gpu_memory:.1f}GB маловата, используется CPU")
-                        return "cpu"
+                        return {
+                            "success": False,
+                            "error": "Неверный формат ответа от API",
+                            "response": data
+                        }
 
-                # Приоритет 2: Apple Silicon
-                elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-                    self.logger.info("🍎 Используется Apple Silicon (MPS)")
-                    return "mps"
-
-                # Приоритет 3: CPU
+                elif response.status_code == 401:
+                    return {
+                        "success": False,
+                        "error": "Ошибка авторизации: неверный API ключ",
+                        "status_code": 401
+                    }
+                elif response.status_code == 429:
+                    retry_after = response.headers.get('Retry-After', 60)
+                    return {
+                        "success": False,
+                        "error": "Превышен лимит запросов. Попробуйте позже.",
+                        "status_code": 429,
+                        "retry_after": retry_after
+                    }
+                elif 400 <= response.status_code < 500:
+                    return {
+                        "success": False,
+                        "error": f"Ошибка клиента: {response.status_code}",
+                        "status_code": response.status_code,
+                        "details": response.text
+                    }
+                elif 500 <= response.status_code < 600:
+                    if attempt < max_retries - 1:
+                        wait_time = (2 ** attempt) + 1
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"Серверная ошибка после {max_retries} попыток",
+                            "status_code": response.status_code,
+                            "details": response.text
+                        }
                 else:
-                    cpu_count = os.cpu_count()
-                    self.logger.info(f"⚡ Используется CPU (ядер: {cpu_count})")
-                    return "cpu"
+                    return {
+                        "success": False,
+                        "error": f"Неизвестная ошибка HTTP: {response.status_code}",
+                        "status_code": response.status_code,
+                        "details": response.text
+                    }
 
-            # Ручной выбор с проверкой доступности
-            elif device == "cuda":
-                if torch.cuda.is_available():
-                    return "cuda"
+            except requests.exceptions.Timeout:
+                if attempt < max_retries - 1:
+                    wait_time = (2 ** attempt) + 1
+                    time.sleep(wait_time)
+                    continue
                 else:
-                    self.logger.warning("❌ CUDA запрошена, но недоступна. Используется CPU")
-                    return "cpu"
+                    return {
+                        "success": False,
+                        "error": f"Таймаут запроса после {max_retries} попыток"
+                    }
 
-            elif device == "mps":
-                if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-                    return "mps"
+            except requests.exceptions.ConnectionError:
+                if attempt < max_retries - 1:
+                    wait_time = (2 ** attempt) + 1
+                    time.sleep(wait_time)
+                    continue
                 else:
-                    self.logger.warning("❌ MPS запрошена, но недоступна. Используется CPU")
-                    return "cpu"
+                    return {
+                        "success": False,
+                        "error": f"Ошибка подключения после {max_retries} попыток"
+                    }
 
-            elif device == "cpu":
-                return "cpu"
-
-            else:
-                self.logger.warning(f"❌ Неизвестное устройство '{device}', используется CPU")
-                return "cpu"
-
-        except Exception as e:
-            self.logger.error(f"❌ Критическая ошибка определения устройства: {e}")
-            return "cpu"  # Гарантированный fallback
-
-    def setup_logging(self):
-        """
-        Профессиональная настройка логирования с ротацией и фильтрацией
-        """
-        import logging.handlers
-        import sys
-
-        self.logger = logging.getLogger('RADARFinancialSummarizer')
-        self.logger.setLevel(logging.INFO)
-
-        # Очистка предыдущих handlers
-        self.logger.handlers.clear()
-
-        # 1. 🎯 Console Handler с улучшенным форматированием
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.INFO)
-
-        class SmartFormatter(logging.Formatter):
-            def format(self, record):
-                # Добавляем эмодзи в зависимости от уровня
-                if record.levelno >= logging.ERROR:
-                    record.msg = f"❌ {record.msg}"
-                elif record.levelno >= logging.WARNING:
-                    record.msg = f"⚠️ {record.msg}"
-                elif record.levelno >= logging.INFO:
-                    record.msg = f"ℹ️ {record.msg}"
-                return super().format(record)
-
-        console_formatter = SmartFormatter(
-            '%(asctime)s | %(levelname)-8s | [RADAR] %(message)s',
-            datefmt='%H:%M:%S'
-        )
-        console_handler.setFormatter(console_formatter)
-
-        # 2. 💾 Rotating File Handler (ограничение размера)
-        try:
-            os.makedirs('logs', exist_ok=True)
-
-            file_handler = logging.handlers.RotatingFileHandler(
-                filename='logs/radar_system.log',
-                maxBytes=10 * 1024 * 1024,  # 10MB
-                backupCount=5,  # 5 backup файлов
-                encoding='utf-8'
-            )
-            file_handler.setLevel(logging.DEBUG)  # В файл пишем больше информации
-
-            file_formatter = logging.Formatter(
-                '%(asctime)s | %(name)-25s | %(levelname)-8s | %(message)s',
-                datefmt='%Y-%m-%d %H:%M:%S'
-            )
-            file_handler.setFormatter(file_formatter)
-
-            self.logger.addHandler(file_handler)
-
-        except Exception as e:
-            print(f"⚠️ File logging unavailable: {e}")
-
-        # 3. 📧 Error Handler (только ошибки в отдельный файл)
-        try:
-            error_handler = logging.FileHandler('logs/radar_errors.log', encoding='utf-8')
-            error_handler.setLevel(logging.ERROR)
-
-            error_formatter = logging.Formatter(
-                '%(asctime)s | ERROR | %(message)s\nStacktrace: %(exc_info)s',
-                datefmt='%Y-%m-%d %H:%M:%S'
-            )
-            error_handler.setFormatter(error_formatter)
-
-            self.logger.addHandler(error_handler)
-
-        except Exception as e:
-            print(f"⚠️ Error logging unavailable: {e}")
-
-        # Добавляем console handler в конце
-        self.logger.addHandler(console_handler)
-
-        # Логируем инициализацию
-        self.logger.info("=" * 50)
-        self.logger.info("🚀 RADAR Financial Summarizer Started")
-        self.logger.info("=" * 50)
-
-    def setup_model(self):
-        """
-        Улучшенная загрузка модели с оптимизацией и обработкой ошибок
-        """
-        try:
-            self.logger.info(f"🔄 Загрузка модели {self.model_name}...")
-
-            # 📊 Логирование информации о системе перед загрузкой
-            self._log_system_info()
-
-            # ⏱️ Замер времени загрузки
-            start_time = time.time()
-
-            # 🎯 Оптимизированная загрузка модели
-            self.summarizer = pipeline(
-                "summarization",
-                model=self.model_name,
-                tokenizer=self.model_name,
-                device=0 if self.device == "cuda" else -1,
-                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,  # 🚀 Экономия памяти
-                trust_remote_code=True,  # 🔧 Для некоторых моделей
-                model_kwargs={
-                    'low_cpu_mem_usage': True,  # 📉 Оптимизация RAM
-                    'force_download': False,  # 💾 Кэширование моделей
-                    'resume_download': True,  # 🔄 Продолжение прерванной загрузки
+            except requests.exceptions.RequestException as e:
+                return {
+                    "success": False,
+                    "error": f"Ошибка сети: {str(e)}"
                 }
-            )
 
-            # 📈 Логирование успешной загрузки
-            load_time = time.time() - start_time
-            self.logger.info(f"✅ Модель загружена за {load_time:.1f} секунд")
-
-            # 🧪 Тестовая суммаризация для проверки работы
-            self._test_model_functionality()
-
-            # 💾 Информация о памяти
-            self._log_memory_usage()
-
-        except OSError as e:
-            # 🌐 Ошибки сети/загрузки
-            if "404" in str(e):
-                self.logger.error(f"❌ Модель {self.model_name} не найдена на HuggingFace Hub")
-                self.logger.info("💡 Проверьте название модели или интернет-соединение")
-            elif "timeout" in str(e).lower():
-                self.logger.error("❌ Таймаут загрузки модели")
-                self.logger.info("💡 Попробуйте увеличить timeout или проверить соединение")
-            else:
-                self.logger.error(f"❌ Ошибка загрузки модели: {e}")
-            raise
-
-        except RuntimeError as e:
-            # 💻 Ошибки памяти/совместимости
-            if "CUDA out of memory" in str(e):
-                self.logger.error("❌ Недостаточно памяти GPU")
-                self.logger.info("💡 Попробуйте использовать CPU или уменьшить batch_size")
-            elif "CUDA" in str(e):
-                self.logger.error(f"❌ Ошибка CUDA: {e}")
-                self.logger.info("💡 Проверьте драйверы NVIDIA и совместимость PyTorch+CUDA")
-            else:
-                self.logger.error(f"❌ Runtime ошибка: {e}")
-            raise
-
-        except Exception as e:
-            self.logger.error(f"❌ Неожиданная ошибка при загрузке модели: {e}")
-            self.logger.info("💡 Проверьте установку transformers и torch")
-            raise
-
-    def _log_system_info(self):
-        """Логирование информации о системе"""
-        self.logger.info(f"⚙️ Устройство: {self.device}")
-        self.logger.info(f"🐍 Python: {sys.version}")
-        self.logger.info(f"🔥 PyTorch: {torch.__version__}")
-        self.logger.info(f"🤗 Transformers: {transformers.__version__}")
-
-        if self.device == "cuda":
-            self.logger.info(f"🎮 GPU: {torch.cuda.get_device_name(0)}")
-            self.logger.info(f"💾 GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
-
-    def _test_model_functionality(self):
-        """Тестирование работоспособности модели с правильными параметрами"""
-        try:
-            test_text = "This is a test sentence to verify the model is working correctly."
-            # Используем адаптивные параметры для теста
-            words_count = len(test_text.split())
-            max_length = max(15, words_count // 2)
-            min_length = max(8, words_count // 3)
-
-            test_result = self.summarizer(test_text, max_length=max_length, min_length=min_length)
-
-            if test_result and len(test_result) > 0:
-                self.logger.info("🧪 Тестовая суммаризация прошла успешно")
-            else:
-                self.logger.warning("⚠️ Тестовая суммаризация вернула пустой результат")
-
-        except Exception as e:
-            self.logger.warning(f"⚠️ Тестовая суммаризация не удалась: {e}")
-
-    def _log_memory_usage(self):
-        """Логирование использования памяти"""
-        if self.device == "cuda":
-            memory_allocated = torch.cuda.memory_allocated() / 1e6
-            memory_reserved = torch.cuda.memory_reserved() / 1e6
-            self.logger.info(f"💾 Память GPU: {memory_allocated:.1f}MB / {memory_reserved:.1f}MB")
-
-    def summarize_news(self, text: str, generate_draft: bool = True, use_cache: bool = True) -> Dict:
-        """
-        УЛУЧШЕННАЯ ФИНАЛЬНАЯ функция суммаризации с кэшированием и метриками
-
-        Args:
-            text: Текст для суммаризации
-            generate_draft: Генерировать ли черновик
-            use_cache: Использовать кэширование
-
-        Returns:
-            Dict: Результат суммаризации или информация об ошибке
-        """
-        start_time = time.time()
-
-        # 1. Расширенная валидация входных данных
-        validation_error = self._validate_summarization_input(text)
-        if validation_error:
-            _record_metrics(success=False)
-            self.logger.error(f"❌ Ошибка валидации: {validation_error}")
-            return {"error": validation_error, "error_type": "validation"}
-
-        text = text.strip()
-        self.logger.info(f"🚀 Начата суммаризация текста длиной {len(text)} символов")
-
-        try:
-            # 2. Классификация типа новости
-            news_type = self._detect_news_type(text)
-            self.logger.debug(f"📰 Определен тип новости: {news_type}")
-
-            # ДЛЯ ОТЛАДКИ: логируем детали классификации
-            if self.debug_mode:
-                text_lower = text.lower()
-                market_terms = ['s&p', 'dow', 'nasdaq', 'index', 'stock market']
-                earnings_terms = ['earnings', 'revenue', 'profit', 'quarterly']
-
-                found_market = [term for term in market_terms if term in text_lower]
-                found_earnings = [term for term in earnings_terms if term in text_lower]
-
-                self.logger.debug(f"🔍 Найдены рыночные термины: {found_market}")
-                self.logger.debug(f"🔍 Найдены отчетные термины: {found_earnings}")
-
-            # 3. Получение АДАПТИВНОЙ конфигурации
-            config = self._get_adaptive_config(text, news_type)
-
-            # 4. Предобработка текста
-            processed_text = self.preprocess_text(text)
-
-            # 5. Суммаризация (с кэшированием или без)
-            cache_info = "disabled"
-            if use_cache:
-                text_hash = _get_text_hash(processed_text)
-                config_key = news_type
-                config_params = tuple(config.values())  # Конвертируем в hashable tuple
-
-                # Пытаемся получить из кэша
-                raw_summary = _cached_summarization(text_hash, config_key, config_params)
-                cache_info = "hit"
-
-                # Если кэш пустой, выполняем реальную суммаризацию
-                if raw_summary.startswith("Кэшированная суммаризация"):
-                    result = self.summarizer(processed_text, **config)
-                    raw_summary = result[0]['summary_text']
-                    cache_info = "miss"
-            else:
-                # Прямой вызов суммаризатора
-                result = self.summarizer(processed_text, **config)
-                raw_summary = result[0]['summary_text']
-
-            # 6. Очистка результата
-            cleaned_summary = self._clean_summary(raw_summary)
-
-            # 7. Генерация черновика (опционально)
-            draft = ""
-            if generate_draft:
-                draft = self._generate_draft(cleaned_summary, news_type)
-
-            # 8. Расчет статистики
-            stats = self._calculate_stats(text, cleaned_summary)
-            stats['cache'] = cache_info
-            stats['text_length_original'] = len(text)
-            stats['text_length_summary'] = len(cleaned_summary)
-
-            # 9. Логирование и метрики
-            processing_time = time.time() - start_time
-            _record_metrics(success=True, processing_time=processing_time)
-
-            self.logger.info(
-                f"✅ Суммаризация завершена. "
-                f"Качество: {stats.get('quality', 'N/A')}, "
-                f"Сжатие: {stats.get('compression_ratio', 0)}, "
-                f"Кэш: {cache_info}, "
-                f"Время: {processing_time:.2f}с"
-            )
-
-            return {
-                "summary": cleaned_summary,
-                "news_type": news_type,
-                "draft": draft,
-                "stats": stats,
-                "processing_time": round(processing_time, 2),
-                "success": True
-            }
-
-        except ValueError as e:
-            # Ошибки валидации данных
-            processing_time = time.time() - start_time
-            _record_metrics(success=False, processing_time=processing_time)
-            self.logger.error(f"❌ Ошибка данных: {e} [Время: {processing_time:.2f}с]")
-            return {"error": str(e), "error_type": "data_validation"}
-
-        except TimeoutError as e:
-            # Таймаут операции
-            processing_time = time.time() - start_time
-            _record_metrics(success=False, processing_time=processing_time)
-            self.logger.error(f"❌ Таймаут: {e} [Время: {processing_time:.2f}с]")
-            return {"error": "Превышено время обработки", "error_type": "timeout"}
-
-        except Exception as e:
-            # Все остальные ошибки
-            processing_time = time.time() - start_time
-            _record_metrics(success=False, processing_time=processing_time)
-            self.logger.error(f"❌ Неожиданная ошибка: {e} [Время: {processing_time:.2f}с]")
-
-            # Детализация ошибки для логирования
-            self.logger.exception("Детали неожиданной ошибки:")
-
-            return {
-                "error": "Внутренняя ошибка сервиса",
-                "error_type": "internal",
-                "details": str(e) if self.debug_mode else None  # Режим отладки
-            }
-
-    def _validate_summarization_input(self, text: str) -> Optional[str]:
-        """
-        Валидация входных данных для суммаризации
-        """
-        if not text or not isinstance(text, str):
-            return "Текст должен быть непустой строкой"
-
-        text = text.strip()
-
-        if len(text) < 30:
-            return "Текст слишком короткий для анализа"
-
-        if len(text) > 100000:
-            return "Текст слишком длинный для анализа"
-
-        # Проверка на осмысленный текст (минимальное количество слов)
-        words = text.split()
-        if len(words) < 5:
-            return "Текст должен содержать хотя бы 5 слов"
-
-        return None
-
-    def _detect_news_type(self, text: str) -> str:
-        """
-        УЛУЧШЕННАЯ классификация с приоритетами и контекстным анализом
-        """
-        text_lower = text.lower()
-
-        # Сначала проверяем самые специфичные паттерны с приоритетами
-        type_checks = [
-            # (тип, ключевые_слова, приоритет)
-            ("MERGERS", ['acquisition', 'merger', 'takeover', 'buyout', 'deal'], 10),
-            ("EARNINGS", [
-                'earnings', 'revenue', 'profit', 'quarterly', 'q1', 'q2', 'q3', 'q4',
-                'financial results', 'beat estimates', 'missed estimates', 'eps', 'ebitda'
-            ], 9),
-            ("CENTRAL_BANK", [
-                'fed', 'federal reserve', 'ecb', 'central bank', 'interest rate',
-                'rate hike', 'rate cut', 'monetary policy', 'powell', 'lagarde'
-            ], 8),
-            ("MARKET", [
-                's&p', 'dow', 'nasdaq', 'index', 'stock market', 'trading session',
-                'market close', 'intraday', 'points', 'gains', 'losses', 'stock', 'stocks',
-                'equities', 'market index', 'indexes', 'trading volume', 'market volatility'
-            ], 7),
-            ("REGULATORY", ['regulation', 'sec', 'lawsuit', 'legal', 'ftc', 'doj'], 6),
-            ("ECONOMIC", ['gdp', 'unemployment', 'cpi', 'economic data', 'jobs report'], 5),
-        ]
-
-        # Находим тип с наивысшим приоритетом
-        best_type = "GENERAL_FINANCIAL"
-        best_priority = 0
-        best_match_count = 0
-
-        for news_type, keywords, priority in type_checks:
-            matches = sum(1 for keyword in keywords if keyword in text_lower)
-            if matches > 0:
-                # Если нашли совпадения и приоритет выше ИЛИ больше совпадений при равном приоритете
-                if (priority > best_priority) or (priority == best_priority and matches > best_match_count):
-                    best_priority = priority
-                    best_match_count = matches
-                    best_type = news_type
-
-        # Особый случай: если есть "earnings" но также много рыночных терминов - это MARKET
-        if best_type == "EARNINGS" and any(
-                term in text_lower for term in ['s&p', 'dow', 'nasdaq', 'index', 'stock market']):
-            market_terms = sum(1 for term in ['s&p', 'dow', 'nasdaq', 'index', 'stock market'] if term in text_lower)
-            if market_terms >= 2:  # Если есть хотя бы 2 рыночных термина
-                best_type = "MARKET"
-
-        return best_type
-
-    def preprocess_text(self, text: str) -> str:
-        """
-        Оптимальная предобработка для финансовых новостей
-        """
-        # 1. 🗑️ Удаление HTML-тегов
-        text = re.sub(r'<.*?>', '', text)
-        # 2. 📧 Удаление email
-        text = re.sub(r'\S+@\S+', '', text)
-        # 3. 🔗 Удаление URL (дополнительная защита)
-        text = re.sub(r'https?://\S+', '', text)
-        # 4. 🔄 Нормализация пробелов
-        text = re.sub(r'\s+', ' ', text)
-        # 5. ✂️ Обрезка пробелов
-        text = text.strip()
-        # 6. Добавление пробела в конец предложения
-        text = re.sub(r'([.!?])([А-ЯA-Z])', r'\1 \2', text)
-
-        return text
-
-    def _clean_summary(self, summary: str) -> str:
-        """
-        УЛУЧШЕННАЯ очистка суммаризации с исправлением числовых форматов
-        """
-        # 1. 💰 ИСПРАВЛЕНИЕ ФИНАНСОВОГО ФОРМАТИРОВАНИЯ
-        # Исправляем пробелы после точек в числах: $89. 5 → $89.5
-        summary = re.sub(r'(\$?\d+)\.\s+(\d+)', r'\1.\2', summary)
-
-        # Форматирование денежных сумм
-        summary = re.sub(r'\$(\s*)(\d+(?:\.\d+)?)\s*(?:billion|million)?', r'$\2', summary)
-        summary = re.sub(r'(\d+(?:\.\d+)?)\s*%', r'\1%', summary)
-        summary = re.sub(r'(\d+(?:\.\d+)?)%\s*-\s*(\d+(?:\.\d+)?)%', r'\1%-\2%', summary)
-
-        # 2. 🔤 Исправление капитализации компаний
-        company_fixes = {
-            'apple': 'Apple', 'fed': 'Fed', 'ceo': 'CEO', 'eps': 'EPS', 'ebitda': 'EBITDA',
-            'iphone': 'iPhone', 's&p': 'S&P'
-        }
-
-        for wrong, correct in company_fixes.items():
-            summary = re.sub(r'\b' + wrong + r'\b', correct, summary, flags=re.IGNORECASE)
-
-        # 3. 📝 Структурирование предложений
-        sentences = [s.strip() for s in re.split(r'[.!?]+', summary) if s.strip()]
-
-        if sentences:
-            cleaned_sentences = []
-            for sent in sentences:
-                words = sent.split()
-                if len(words) >= 2:  # Уменьшил с 3 до 2 для лучшего сохранения контекста
-                    # Капитализация первого слова
-                    if sent and sent[0].isalpha():
-                        sent = sent[0].upper() + sent[1:]
-                    cleaned_sentences.append(sent)
-
-            summary = '. '.join(cleaned_sentences)
-
-            # Финальная точка
-            if summary and summary[-1] not in '.!?':
-                summary += '.'
-
-        # 4. 🧹 Финальная очистка
-        summary = re.sub(r'\s+', ' ', summary).strip()
-        summary = re.sub(r'\s([.,!?])', r'\1', summary)  # Убираем пробелы перед пунктуацией
-
-        return summary
-
-    def _generate_draft(self, summary: str, news_type: str) -> str:
-        """Генерация черновика"""
-
-        templates = {
-            "EARNINGS": f"""📊 **EARNINGS REPORT**
-
-    {summary}
-
-    **KEY HIGHLIGHTS:**
-    • Financial performance metrics
-    • Growth and profitability trends  
-    • Capital allocation decisions
-    • Management outlook and guidance
-
-    **INVESTMENT IMPACT:**
-    Expected market reaction and analyst response""",
-
-            "CENTRAL_BANK": f"""🏦 **FED POLICY UPDATE**
-
-    {summary}
-
-    **POLICY DECISION:**
-    • Interest rate changes
-    • Economic assessment
-    • Forward guidance
-
-    **MARKET IMPLICATIONS:**
-    Impact on financial markets""",
-
-            "MARKET": f"""📈 **MARKET ANALYSIS**
-
-    {summary}
-
-    **TODAY'S ACTION:**
-    • Index performance
-    • Sector movements  
-    • Trading activity
-
-    **KEY DRIVERS:**
-    Market influences and outlook""",
-
-            "MERGERS": f"""🤝 **M&A TRANSACTION**
-
-    {summary}
-
-    **DEAL DETAILS:**
-    • Acquisition terms and valuation
-    • Strategic rationale and synergies  
-    • Regulatory approval timeline
-    • Integration plans and leadership
-
-    **INDUSTRY IMPACT:**
-    Competitive landscape changes and market consolidation""",
-
-            "REGULATORY": f"""⚖️ **REGULATORY UPDATE**
-
-    {summary}
-
-    **LEGAL DEVELOPMENTS:**
-    • Regulatory actions and decisions
-    • Compliance requirements
-    • Legal proceedings and outcomes
-    • Policy implications
-
-    **BUSINESS IMPACT:**
-    Operational and financial consequences""",
-
-            "ECONOMIC": f"""📊 **ECONOMIC DATA**
-
-    {summary}
-
-    **KEY INDICATORS:**
-    • Major economic metrics and trends
-    • Comparison with forecasts and prior periods
-    • Sector-specific impacts
-    • Policy implications
-
-    **MARKET REACTION:**
-    Financial market responses and outlook""",
-
-            "TECHNOLOGY": f"""🔬 **TECHNOLOGY NEWS**
-
-    {summary}
-
-    **INNOVATION HIGHLIGHTS:**
-    • Technological developments and features
-    • Research and development progress
-    • Competitive advancements
-    • Market adoption and potential
-
-    **INVESTMENT POTENTIAL:**
-    Growth opportunities and sector impact""",
-
-            "COMMODITIES": f"""🛢️ **COMMODITIES UPDATE**
-
-    {summary}
-
-    **MARKET MOVEMENTS:**
-    • Price changes and trading patterns
-    • Supply and demand factors
-    • Geopolitical influences
-    • Inventory and production data
-
-    **TRADING OUTLOOK:**
-    Price forecasts and risk factors""",
-
-            "GENERAL_FINANCIAL": f"""📰 **FINANCIAL NEWS**
-
-    {summary}
-
-    **KEY DEVELOPMENTS:**
-    Main events and their financial significance
-
-    **MARKET IMPLICATIONS:**
-    Potential impacts and considerations"""
-        }
-
-        return templates.get(news_type, templates["GENERAL_FINANCIAL"])
-
-    def _calculate_stats(self, original: str, summary: str) -> Dict:
-        """Расширенная статистика суммаризации"""
-        # Базовые метрики
-        orig_words = len(original.split())
-        summ_words = len(summary.split())
-        orig_chars = len(original)
-        summ_chars = len(summary)
-        orig_sentences = len([s for s in original.split('.') if s.strip()])
-        summ_sentences = len([s for s in summary.split('.') if s.strip()])
-
-        # Расчет коэффициентов
-        ratio_words = orig_words / summ_words if summ_words > 0 else 1
-        ratio_chars = orig_chars / summ_chars if summ_chars > 0 else 1
-        reduction_percent = (1 - summ_words / orig_words) * 100 if orig_words > 0 else 0
-
-        # Оценка качества на основе нескольких факторов
-        if 2.0 <= ratio_words <= 3.5 and summ_sentences >= 1:
-            quality = "✅ Отлично"
-            quality_score = 5
-        elif 1.5 <= ratio_words < 2.0 and summ_sentences >= 1:
-            quality = "✅ Хорошо"
-            quality_score = 4
-        elif ratio_words > 3.5:
-            quality = "⚠️ Можно короче"
-            quality_score = 3
-        elif ratio_words < 1.5:
-            quality = "⚠️ Можно подробнее"
-            quality_score = 2
-        else:
-            quality = "❌ Низкое качество"
-            quality_score = 1
-
-        # Дополнительные метрики
-        words_per_sentence = summ_words / summ_sentences if summ_sentences > 0 else 0
-        density_score = summ_words / orig_words if orig_words > 0 else 0
-
-        # Анализ информативности
-        unique_words_ratio = len(set(summary.split())) / summ_words if summ_words > 0 else 0
-        info_density = "Высокая" if unique_words_ratio > 0.7 else "Средняя" if unique_words_ratio > 0.5 else "Низкая"
+            except json.JSONDecodeError as e:
+                return {
+                    "success": False,
+                    "error": f"Ошибка декодирования JSON: {str(e)}",
+                    "response_text": response.text if 'response' in locals() else 'N/A'
+                }
+
+            except Exception as e:
+                return {
+                    "success": False,
+                    "error": f"Неожиданная ошибка: {str(e)}"
+                }
 
         return {
-            # Основные метрики
-            "original_words": orig_words,
-            "summary_words": summ_words,
-            "original_chars": orig_chars,
-            "summary_chars": summ_chars,
-            "original_sentences": orig_sentences,
-            "summary_sentences": summ_sentences,
-
-            # Коэффициенты сжатия
-            "compression_ratio_words": f"{ratio_words:.1f}x",
-            "compression_ratio_chars": f"{ratio_chars:.1f}x",
-            "reduction_percent": f"{reduction_percent:.0f}%",
-            "compression_ratio": f"{ratio_words:.1f}x",
-
-            # Качество и оценка
-            "quality": quality,
-            "quality_score": quality_score,  # числовая оценка от 1 до 5
-            "info_density": info_density,  # плотность информации
-
-            # Дополнительные метрики
-            "words_per_sentence": round(words_per_sentence, 1),
-            "density_score": round(density_score, 3),
-            "unique_words_ratio": f"{unique_words_ratio:.1%}",
-
-            # Рекомендации
-            "recommendation": self._generate_recommendation(ratio_words, summ_sentences, quality_score)
+            "success": False,
+            "error": "Превышено максимальное количество попыток"
         }
 
-    def _generate_recommendation(self, ratio: float, sentences: int, score: int) -> str:
-        """Генерация рекомендаций по улучшению"""
-        recommendations = []
+    def _extract_entities(self, content: str) -> Dict[str, Any]:
+        """
+        Надежное извлечение сущностей через отдельный запрос к AI
+        """
+        entity_prompt = f"""
+        Ты - финансовый аналитик. Извлеки ВСЕ сущности из текста новости и определи сентимент.
 
-        if ratio > 4.0:
-            recommendations.append("увеличить детализацию")
-        elif ratio < 1.2:
-            recommendations.append("сократить текст")
+        ТЕКСТ:
+        {content}
 
-        if sentences < 1:
-            recommendations.append("добавить законченные предложения")
-        elif sentences > 5:
-            recommendations.append("объединить некоторые предложения")
+        ИЗВЛЕКИ ТОЧНО СЛЕДУЮЩИЕ СУЩНОСТИ:
 
-        if score < 3:
-            recommendations.append("проверить информативность")
+        1. КОМПАНИИ - все упомянутые компании
+        2. ТИКЕРЫ - биржевые тикеры для КАЖДОЙ найденной компании
+        3. СТРАНЫ - все упомянутые страны
+        4. СЕКТОРА - отрасли экономики
+        5. ВАЛЮТЫ - валюты
+        6. ПЕРСОНЫ - упомянутые люди
+        7. СЕНТИМЕНТ_SCORE - числовая оценка от -1.0 до 1.0
 
-        return "; ".join(recommendations) if recommendations else "оптимально"
+        ОСОБОЕ ВНИМАНИЕ ТИКЕРАМ:
+        - Сбербанк → SBER
+        - Газпром → GAZP  
+        - Лукойл → LKOH
+        - Роснефть → ROSN
+        - Норникель → GMKN
+
+        ФОРМАТ ОТВЕТА - ТОЛЬКО JSON:
+        {{
+            "companies": ["Сбербанк", "Газпром"],
+            "tickers": ["SBER", "GAZP"],
+            "countries": ["Россия"],
+            "sectors": ["финансы", "нефтегазовый"],
+            "currencies": ["RUB"],
+            "people": [],
+            "sentiment_score": 0.7
+        }}
+
+        КРИТИЧЕСКИ ВАЖНО:
+        - Для КАЖДОЙ компании ДОЛЖЕН быть тикер
+        - Определи сентимент на основе общего тона новости
+        - Ответ ТОЛЬКО JSON, без лишнего текста
+        """
+
+        messages = [{"role": "user", "content": entity_prompt}]
+        response = self._make_request(
+            messages,
+            max_tokens=1000,
+            temperature=0.1,
+            model="openai/gpt-4o"
+        )
+
+        if response.get("success"):
+            try:
+                content = response["content"].strip()
+                if content.startswith('```json'):
+                    content = content[7:]
+                if content.endswith('```'):
+                    content = content[:-3]
+                content = content.strip()
+
+                entities = json.loads(content)
+
+                # Валидация
+                if entities.get("companies") and not entities.get("tickers"):
+                    entities["tickers"] = ["UNKNOWN"] * len(entities["companies"])
+
+                return entities
+
+            except Exception:
+                return self._create_empty_entities()
+        else:
+            return self._create_empty_entities()
+
+    def _create_empty_entities(self) -> Dict[str, List[str]]:
+        """Создает пустую структуру сущностей"""
+        return {
+            "companies": [],
+            "tickers": [],
+            "countries": [],
+            "sectors": [],
+            "currencies": [],
+            "people": [],
+            "sentiment": "neutral",
+            "sentiment_score": 0.0
+        }
+
+    def _parse_news_content(self, content):
+        """
+        Парсит содержимое новости и извлекает структурированные данные + сущности
+        """
+        try:
+            if isinstance(content, dict):
+                parsed_data = {
+                    "title": content.get("title", ""),
+                    "summary": content.get("lead", content.get("content", ""))[:200] + "..."
+                    if content.get("lead") or content.get("content")
+                    else "Нет содержимого",
+                    "key_points": content.get("key_points", content.get("bullets", [])),
+                    "impact": "neutral",
+                    "sources": content.get("sources", [])
+                }
+
+                # Добавляем сущности если они есть в контенте
+                if "entities" in content:
+                    parsed_data["entities"] = content["entities"]
+                else:
+                    # Извлекаем сущности из текста
+                    text_for_entities = content.get("lead", "") + " " + content.get("content", "")
+                    if text_for_entities.strip():
+                        parsed_data["entities"] = self._extract_entities(text_for_entities)
+
+                return parsed_data
+
+            if isinstance(content, str):
+                json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                if json_match:
+                    try:
+                        parsed_json = json.loads(json_match.group())
+                        return self._parse_news_content(parsed_json)
+                    except:
+                        pass
+
+                summary = content[:200] + "..." if len(content) > 200 else content
+
+                lines = content.split('\n')
+                key_points = []
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith(('•', '-', '*')) and len(line) > 2:
+                        key_points.append(line[1:].strip())
+
+                if not key_points:
+                    sentences = re.split(r'[.!?]+', content)
+                    key_points = [s.strip() for s in sentences if len(s.strip()) > 20][:5]
+
+                parsed_data = {
+                    "title": "",
+                    "summary": summary,
+                    "key_points": key_points,
+                    "impact": "neutral",
+                    "sources": []
+                }
+
+                # Добавляем извлечение сущностей для текста
+                if content.strip():
+                    parsed_data["entities"] = self._extract_entities(content)
+
+                return parsed_data
+
+            return {
+                "title": "",
+                "summary": "Не удалось проанализировать содержимое",
+                "key_points": [],
+                "impact": "unknown",
+                "sources": [],
+                "entities": self._create_empty_entities()
+            }
+
+        except Exception:
+            return {
+                "title": "Анализ новости",
+                "summary": "Ошибка анализа",
+                "key_points": ["Не удалось проанализировать содержимое"],
+                "impact": "unknown",
+                "sources": [],
+                "entities": self._create_empty_entities()
+            }
 
 
-# 🎯 ФИНАЛЬНЫЙ ТЕСТ
-def test_radar():
-    """Финальный тест готовой системы RADAR"""
+class NewsProcessor:
+    """
+    Обработчик готовых новостных текстов для создания черновиков RADAR
+    """
 
-    test_articles = [
-        {
-            "text": """Apple Inc. reported fourth-quarter revenue of $89.5 billion, beating analyst estimates of $88.9 billion. 
-            iPhone sales grew 12% year-over-year to $42.3 billion, while services revenue reached an all-time high of $19.2 billion. 
-            The company announced a new $100 billion share buyback program and increased its dividend by 5% to $0.24 per share. 
-            CEO Tim Cook stated that the company is seeing strong growth in emerging markets and expects continued momentum.""",
-            "expected_type": "EARNINGS"
+    def __init__(self, openrouter_client: OpenRouterClient):
+        self.client = openrouter_client
+
+    def create_radar_draft_from_text(self, news_text: str, topic: str = "") -> Dict[str, Any]:
+        """
+        Создает черновик RADAR с гарантированным извлечением сущностей через отдельный запрос
+        """
+        try:
+            # Основной запрос для анализа содержания
+            prompt = self._create_analysis_prompt(news_text, topic)
+            messages = [{"role": "user", "content": prompt}]
+            response = self.client._make_request(messages, max_tokens=2500)
+
+            if response and response.get("success"):
+                result = self._process_analysis_response(response["content"], news_text)
+
+                # ОТДЕЛЬНЫЙ ЗАПРОС ДЛЯ СУЩНОСТЕЙ - гарантия качества
+                entities = self.client._extract_entities(news_text)
+                result["entities"] = entities
+
+                # Обновляем parsed_content
+                if "parsed_content" in result:
+                    result["parsed_content"]["entities"] = entities
+
+                return result
+            else:
+                return self._create_fallback_draft(news_text, topic)
+
+        except Exception:
+            return self._create_fallback_draft(news_text, topic)
+
+    def _create_analysis_prompt(self, news_text: str, topic: str) -> str:
+        """
+        Создает промпт для анализа с расширенными метриками
+        """
+        # Предварительный расчет статистик текста
+        orig_words = len(news_text.split())
+        orig_chars = len(news_text)
+
+        return f"""Ты - финансовый аналитик сервиса RADAR. Проанализируй новость и создай детализированный черновик.
+
+ТЕМА: {topic if topic else 'Не указана'}
+
+ТЕКСТ НОВОСТИ:
+{news_text}
+
+СОЗДАЙ ЧЕРНОВИК В ФОРМАТЕ JSON:
+
+{{
+    "title": "Заголовок",
+    "lead": "Краткое описание 1-2 предложения", 
+    "key_points": ["факт1", "факт2", "факт3"],
+    "impact_analysis": "Анализ влияния на рынки",
+    "sentiment_score": 0.85,
+
+    "hottness": {{
+        "score": 0.8,
+        "reasoning": "Почему новость горячая"
+    }},
+
+    "why_now": "1-2 фразы о важности и новизне",
+
+    "timeline": {{
+        "processing_start": "{time.strftime('%Y-%m-%d %H:%M:%S')}",
+        "processing_end": "будет заполнено автоматически"
+    }},
+
+    "statistics": {{
+        "orig_words": {orig_words},
+        "orig_chars": {orig_chars},
+        "summ_words": 0,
+        "summ_chars": 0, 
+        "ratio_words": 0.0,
+        "ratio_chars": 0.0,
+        "reduction_percent": 0.0,
+        "quality_score": 0.0,
+        "words_per_sentence": 0.0,
+        "density_score": 0.0,
+        "unique_words_ratio": 0.0,
+        "info_density": 0.0,
+        "readability_score": 0.0
+    }},
+
+    "sources": ["Источник"],
+    "confidence": 0.95,
+
+    "entities": {{
+        "companies": ["Сбербанк", "Газпром"],
+        "tickers": ["SBER", "GAZP"],
+        "countries": ["Россия"], 
+        "sectors": ["финансы", "нефтегазовый"],
+        "currencies": ["RUB"],
+        "people": []
+    }}
+}}
+
+ДЕТАЛЬНЫЕ ТРЕБОВАНИЯ:
+
+1. HOTTNESS - насколько новость горячая:
+   - score: 0.0-1.0 (1.0 - самая горячая)
+   - reasoning: объяснение почему новость важна для широкой аудитории
+
+2. WHY_NOW - актуальность:
+   - Новизна информации
+   - Подтверждения или опровержения
+   - Масштаб затронутых активов/рынков
+   - Формат: 1-2 короткие фразы
+
+3. TIMELINE - хронология:
+   - processing_start: время начала обработки (уже заполнено)
+   - processing_end: НЕ заполняй - будет добавлено автоматически
+
+4. СЕНТИМЕНТ - ТОЛЬКО ЧИСЛО:
+   - sentiment_score: числовая оценка от -1.0 до 1.0
+   - НЕ включай текстовое поле "sentiment"
+   - -1.0 до -0.7: сильно негативный
+   - -0.7 до -0.3: умеренно негативный  
+   - -0.3 до 0.3: нейтральный
+   - 0.3 до 0.7: умеренно позитивный
+   - 0.7 до 1.0: сильно позитивный
+
+5. СУЩНОСТИ - как ранее:
+   - companies: все упомянутые компании
+   - tickers: биржевые тикеры для каждой компании
+   - countries: все упомянутые страны
+   - sectors: отрасли экономики
+   - currencies: валюты
+   - people: упомянутые люди
+
+ПРИМЕР HOTTNESS:
+- Новость о ключевой ставке ЦБ → score: 0.9
+- Отчетность крупной компании → score: 0.7
+- Техническая новость → score: 0.3
+
+ОТВЕТ ТОЛЬКО В JSON ФОРМАТЕ БЕЗ ЛЮБЫХ ДОПОЛНИТЕЛЬНЫХ КОММЕНТАРИЕВ"""
+
+    def _calculate_text_statistics(self, original_text: str, summary_text: str) -> Dict[str, float]:
+        """
+        Расчет подробных статистик текста
+        """
+        import re
+        from collections import Counter
+
+        # Базовые метрики
+        orig_words = len(original_text.split())
+        orig_chars = len(original_text)
+        summ_words = len(summary_text.split())
+        summ_chars = len(summary_text)
+
+        # Коэффициенты сжатия
+        ratio_words = summ_words / orig_words if orig_words > 0 else 0
+        ratio_chars = summ_chars / orig_chars if orig_chars > 0 else 0
+        reduction_percent = (1 - ratio_words) * 100
+
+        # Анализ качества
+        orig_sentences = len(re.split(r'[.!?]+', original_text))
+        summ_sentences = len(re.split(r'[.!?]+', summary_text))
+
+        words_per_sentence = summ_words / summ_sentences if summ_sentences > 0 else 0
+
+        # Плотность информации (уникальные слова)
+        orig_word_count = Counter(original_text.lower().split())
+        summ_word_count = Counter(summary_text.lower().split())
+
+        unique_words_ratio = len(summ_word_count) / summ_words if summ_words > 0 else 0
+
+        # Сложные метрики
+        density_score = (summ_words / orig_words) * (
+                    len(set(summary_text.split())) / summ_words) if summ_words > 0 else 0
+        info_density = summ_words / orig_words if orig_words > 0 else 0
+
+        # Оценка читаемости (упрощенная)
+        avg_word_length = sum(len(word) for word in summary_text.split()) / summ_words if summ_words > 0 else 0
+        readability_score = max(0, min(1, (20 - words_per_sentence) / 15 * (10 - avg_word_length) / 8))
+
+        # Общая оценка качества
+        quality_score = min(1.0, (
+                readability_score * 0.3 +
+                min(1.0, unique_words_ratio * 2) * 0.3 +
+                min(1.0, 1 - abs(0.2 - ratio_words)) * 0.4  # Идеальное сжатие ~20%
+        ))
+
+        return {
+            "orig_words": orig_words,
+            "orig_chars": orig_chars,
+            "summ_words": summ_words,
+            "summ_chars": summ_chars,
+            "ratio_words": round(ratio_words, 3),
+            "ratio_chars": round(ratio_chars, 3),
+            "reduction_percent": round(reduction_percent, 1),
+            "quality_score": round(quality_score, 3),
+            "words_per_sentence": round(words_per_sentence, 1),
+            "density_score": round(density_score, 3),
+            "unique_words_ratio": round(unique_words_ratio, 3),
+            "info_density": round(info_density, 3),
+            "readability_score": round(readability_score, 3)
+        }
+
+    def _process_analysis_response(self, ai_response: str, original_text: str) -> Dict[str, Any]:
+        """
+        Обрабатывает ответ AI с расчетом статистик
+        """
+        try:
+            cleaned_content = ai_response.strip()
+            if cleaned_content.startswith('```json'):
+                cleaned_content = cleaned_content[7:]
+            if cleaned_content.endswith('```'):
+                cleaned_content = cleaned_content[:-3]
+            cleaned_content = cleaned_content.strip()
+
+            result = json.loads(cleaned_content)
+
+            # РАСЧЕТ СТАТИСТИК
+            summary_text = result.get("lead", "") + " " + " ".join(result.get("key_points", []))
+            stats = self._calculate_text_statistics(original_text, summary_text)
+            result["statistics"] = stats
+
+            # ОБНОВЛЕНИЕ TIMELINE
+            if "timeline" in result:
+                result["timeline"]["processing_end"] = time.strftime("%Y-%m-%d %H:%M:%S")
+
+            # Добавляем мета-информацию
+            result["original_text_preview"] = original_text[:100] + "..." if len(original_text) > 100 else original_text
+            result["processed_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            result["parsed_content"] = self.client._parse_news_content(result)
+
+            return result
+
+        except json.JSONDecodeError:
+            return self._create_fallback_draft(original_text, topic="Анализ текста")
+        except Exception:
+            return self._create_fallback_draft(original_text, topic="Анализ текста")
+
+    def _create_fallback_draft(self, text: str, topic: str) -> Dict[str, Any]:
+        """
+        Создает резервный черновик с извлечением сущностей через AI
+        """
+        entities = self.client._extract_entities(text)
+
+        # Расчет статистик для fallback
+        summary_text = text[:150] + "..." if len(text) > 150 else text
+        stats = self._calculate_text_statistics(text, summary_text)
+
+        return {
+            "title": f"Анализ: {topic}" if topic else "Анализ новости",
+            "lead": summary_text,
+            "key_points": ["Не удалось выполнить глубокий анализ"],
+            "impact_analysis": "Требуется дополнительный анализ",
+            "sentiment_score": entities.get("sentiment_score", 0.0),
+            "hottness": {
+                "score": 0.3,
+                "reasoning": "Ограниченный анализ из-за ошибки обработки"
+            },
+            "why_now": "Требуется дополнительный анализ для определения актуальности",
+            "timeline": {
+                "processing_start": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "processing_end": time.strftime("%Y-%m-%d %H:%M:%S")
+            },
+            "statistics": stats,
+            "sources": ["Исходный текст"],
+            "confidence": 0.0,
+            "entities": entities,
+            "original_text_preview": text[:100] + "..." if len(text) > 100 else text,
+            "parsed_content": {
+                "title": f"Анализ: {topic}" if topic else "Анализ новости",
+                "summary": summary_text,
+                "key_points": ["Не удалось выполнить глубокий анализ"],
+                "impact": "unknown",
+                "sources": ["Исходный текст"],
+                "entities": entities
+            }
+        }
+
+
+def convert_to_target_format(ai_result: Dict[str, Any], original_topic: str = "", original_text: str = "") -> Dict[str, Any]:
+    """
+    Конвертирует результат AI-анализа в целевой формат RADAR
+    """
+    # Извлекаем основные компоненты из существующего результата
+    draft_data = ai_result.get("draft", {})
+    if not draft_data:
+        # Если структура другая, пытаемся извлечь из корневых полей
+        draft_data = {
+            "title": ai_result.get("title", ""),
+            "lead": ai_result.get("lead", ai_result.get("summary", "")),
+            "points": ai_result.get("key_points", ai_result.get("points", []))
+        }
+
+    # Извлекаем entities (может быть в разных местах)
+    entities = ai_result.get("entities", {})
+    if not entities and "parsed_content" in ai_result:
+        entities = ai_result["parsed_content"].get("entities", {})
+
+    # Извлекаем sentiment (может быть под разными именами)
+    sentiment = ai_result.get("sentiment_score",
+                              ai_result.get("sentiment",
+                                            ai_result.get("hottness", {}).get("sentiment_score", 0.0)))
+
+    # Извлекаем hotness (может быть под разными именами)
+    hotness_data = ai_result.get("hottness", {})
+    if not hotness_data:
+        hotness_data = ai_result.get("hotness", {})
+
+    hotness_score = hotness_data.get("score",
+                                     ai_result.get("hotness_score",
+                                                   ai_result.get("hottness_score", 0.5)))
+
+    # Извлекаем why_hot и why_now
+    why_hot = ai_result.get("why_hot",
+                            hotness_data.get("reasoning",
+                                             ai_result.get("reasoning", "")))
+
+    why_now = ai_result.get("why_now", "")
+
+    # Извлекаем impact_analysis
+    impact_analysis = ai_result.get("impact_analysis",
+                                    ai_result.get("impact",
+                                                  "Требуется дополнительный анализ"))
+
+    # Обрабатываем statistics
+    stats = ai_result.get("statistics", {})
+    target_stats = {
+        "compression": stats.get("compression", stats.get("ratio_chars", 0.5)),
+        "quality": stats.get("quality", stats.get("quality_score", 1.0)),
+        "processing_started": stats.get("processing_started", datetime.now()),
+        "processing_ended": stats.get("processing_ended", datetime.now())
+    }
+
+    # Обрабатываем entities для гарантии наличия всех полей
+    target_entities = {
+        "companies": entities.get("companies", []),
+        "tickers": entities.get("tickers", []),
+        "countries": entities.get("countries", []),
+        "sectors": entities.get("sectors", []),
+        "currencies": entities.get("currencies", [])
+    }
+
+    # Извлекаем links/sources
+    links = ai_result.get("links",
+                          ai_result.get("sources",
+                                        ai_result.get("parsed_content", {}).get("sources", [])))
+
+    # Определяем datetime
+    news_datetime = ai_result.get("datetime",
+                                  ai_result.get("processed_at",
+                                                ai_result.get("timeline", {}).get("processing_start",
+                                                                                  datetime.now())))
+
+    # Если datetime строка, конвертируем в datetime объект
+    if isinstance(news_datetime, str):
+        try:
+            news_datetime = datetime.fromisoformat(news_datetime.replace('Z', '+00:00'))
+        except:
+            news_datetime = datetime.now()
+
+    # Определяем is_short (менее 500 символов) - ИСПРАВЛЕННАЯ ВЕРСИЯ
+    text_for_length_check = original_text or ai_result.get("original_text", "") or ""
+    is_short = len(text_for_length_check) < 500 if text_for_length_check else False
+
+    # Собираем финальный результат в ЦЕЛЕВОМ формате
+    target_format = {
+        "topic": original_topic or ai_result.get("topic", "Анализ новости"),
+        "draft": {
+            "title": draft_data.get("title", "Заголовок не определен"),
+            "lead": draft_data.get("lead", "Описание не предоставлено"),
+            "points": draft_data.get("points", draft_data.get("key_points", []))
         },
+        "sentiment": float(sentiment),
+        "hotness": float(hotness_score),
+        "why_hot": why_hot,
+        "why_now": why_now,
+        "impact_analysis": impact_analysis,
+        "statistics": target_stats,
+        "entities": target_entities,
+        "datetime": news_datetime,
+        "links": links,
+        "is_short": is_short  # ← НОВОЕ ПОЛЕ
+    }
+    return target_format
+
+
+def convert_news_processor_result(processor_result: Dict[str, Any], topic: str = "") -> Dict[str, Any]:
+    """
+    Специализированная конвертация для результата из вашего NewsProcessor
+    """
+    return convert_to_target_format(processor_result, topic)
+
+
+def process_text_to_target_format(text: str, topic: str = "") -> Dict[str, Any]:
+    """
+    Быстрая обработка текста с immediate конвертацией в целевой формат
+    """
+    client = OpenRouterClient()
+    processor = NewsProcessor(client)
+    result = processor.create_radar_draft_from_text(text, topic)
+    return convert_to_target_format(result, topic)
+
+
+def main_with_conversion():
+    """Демонстрация работы с конвертацией"""
+    try:
+        client = OpenRouterClient()
+        processor = NewsProcessor(client)
+        print("Процессор новостей инициализирован!\n")
+    except Exception as e:
+        print(f"Ошибка инициализации: {e}")
+        return
+
+    sample_text = """Сегодня на Московской бирже акции Сбербанка показали рост на 2.3%, достигнув отметки в 285 рублей за бумагу. 
+    Аналитики связывают это с публикацией положительной отчетности банка за второй квартал. 
+    Выручка увеличилась на 15% по сравнению с аналогичным периодом прошлого года."""
+
+    # Получаем результат от вашего существующего процессора
+    original_result = processor.create_radar_draft_from_text(sample_text, "Котировки акций")
+
+    # Конвертируем в нужный формат
+    final_result = convert_to_target_format(original_result, "Котировки акций")
+
+    # Теперь можно сохранять в MongoDB
+    print("РЕЗУЛЬТАТ В ЦЕЛЕВОМ ФОРМАТЕ:")
+    print(json.dumps(final_result, indent=2, default=str))
+
+    # Для вставки в MongoDB:
+    # collection.insert_one(final_result)
+
+
+def _print_radar_result(result):
+    """Выводит результат RADAR с расширенными метриками"""
+    print("ЗАГОЛОВОК:", result.get("title", "Нет заголовка"))
+    print("ЛИД:", result.get("lead", "Нет лида"))
+
+    # СЕНТИМЕНТ
+    sentiment_score = result.get("sentiment_score", 0)
+    print(f"СЕНТИМЕНТ: {sentiment_score}")
+
+    # HOTTNESS
+    hottness = result.get("hottness", {})
+    if hottness:
+        score = hottness.get("score", 0)
+        print(f"ГОРЯЧЕСТЬ: {score}")
+        if hottness.get("reasoning"):
+            print(f"Причина: {hottness['reasoning']}")
+
+    # WHY_NOW
+    why_now = result.get("why_now", "")
+    if why_now:
+        print(f"ПОЧЕМУ СЕЙЧАС: {why_now}")
+
+    # TIMELINE
+    timeline = result.get("timeline", {})
+    if timeline:
+        print("ТАЙМЛАЙН:")
+        if timeline.get("processing_start"):
+            print(f" Обработка начата: {timeline['processing_start']}")
+        if timeline.get("processing_end"):
+            print(f" Обработка завершена: {timeline['processing_end']}")
+
+    print("АНАЛИЗ ВЛИЯНИЯ:", result.get("impact_analysis", "Нет анализа"))
+
+    # СТАТИСТИКИ
+    stats = result.get("statistics", {})
+    if stats:
+        print("СТАТИСТИКИ ТЕКСТА:")
+        print(f"   Исходный текст: {stats.get('orig_words', 0)} слов, {stats.get('orig_chars', 0)} символов")
+        print(f"   Сводка: {stats.get('summ_words', 0)} слов, {stats.get('summ_chars', 0)} символов")
+        print(f"   Сжатие: {stats.get('reduction_percent', 0)}%")
+        print(f"   Качество: {stats.get('quality_score', 0)}")
+        print(f"   Плотность инфо: {stats.get('info_density', 0)}")
+
+    # КЛЮЧЕВЫЕ ПУНКТЫ
+    key_points = result.get("key_points", [])
+    if key_points:
+        print("КЛЮЧЕВЫЕ ПУНКТЫ:")
+        for i, point in enumerate(key_points, 1):
+            print(f"   {i}. {point}")
+
+    # СУЩНОСТИ
+    entities = result.get("entities", {})
+    if entities:
+        print("СУЩНОСТИ:")
+        if entities.get("companies"):
+            print(f"   Компании: {', '.join(entities['companies'])}")
+        if entities.get("tickers"):
+            print(f"   Тикеры: {', '.join(entities['tickers'])}")
+        if entities.get("countries"):
+            print(f"   Страны: {', '.join(entities['countries'])}")
+        if entities.get("sectors"):
+            print(f"   Сектора: {', '.join(entities['sectors'])}")
+        if entities.get("currencies"):
+            print(f"   Валюты: {', '.join(entities['currencies'])}")
+        if entities.get("people"):
+            print(f"   Персоны: {', '.join(entities['people'])}")
+
+    sources = result.get("sources", [])
+    if sources:
+        print("ИСТОЧНИКИ:", ", ".join(sources))
+
+
+def main():
+    """Демонстрация обработки готовых текстов"""
+    try:
+        client = OpenRouterClient()
+        processor = NewsProcessor(client)
+        print("Процессор новостей инициализирован!\n")
+    except Exception as e:
+        print(f"Ошибка инициализации: {e}")
+        return
+
+    sample_texts = [
         {
-            "text": """The Federal Reserve maintained its benchmark interest rate at 5.25%-5.50% during today's policy meeting. 
-            Fed Chair Jerome Powell emphasized that the central bank remains committed to bringing inflation down to its 2% target. 
-            The updated economic projections show most officials expect at least one more rate hike this year.""",
-            "expected_type": "CENTRAL_BANK"
-        },
-        {
-            "text": """The S&P 500 index rose 1.5% today, led by technology stocks amid positive earnings reports. 
-            Trading volume was above average as investors reacted to the Fed's policy decision and economic data. 
-            Market volatility declined as uncertainty about interest rates diminished. The Dow Jones gained 200 points.""",
-            "expected_type": "MARKET"
-        },
-        # Добавьте тест на ошибки
-        {
-            "text": "Short text",
-            "expected_type": "ERROR",
-            "description": "Тест короткого текста"
-        },
-        {
-            "text": "",
-            "expected_type": "ERROR",
-            "description": "Тест пустого текста"
+            "topic": "Котировки акций",
+            "text": """Сегодня на Московской бирже акции Сбербанка показали рост на 2.3%, достигнув отметки в 285 рублей за бумагу. Аналитики связывают это с публикацией положительной отчетности банка за второй квартал. Выручка увеличилась на 15% по сравнению с аналогичным периодом прошлого года. Одновременно акции Газпрома снизились на 1.1%."""
         }
     ]
 
-    print("🚀 RADAR - ФИНАЛЬНАЯ ГОТОВАЯ СИСТЕМА")
+    print("РЕЗУЛЬТАТ АНАЛИЗА НОВОСТЕЙ")
     print("=" * 60)
 
-    # 📊 Статистика тестирования
-    total_tests = len(test_articles)
-    passed_tests = 0
-    total_processing_time = 0
+    for sample in sample_texts:
+        print(f"\nТЕМА: {sample['topic']}")
+        print(f"ТЕКСТ: {sample['text'][:100]}...")
 
-    summarizer = RADARFinancialSummarizer()
+        result = processor.create_radar_draft_from_text(sample['text'], sample['topic'])
 
-    for i, test_case in enumerate(test_articles, 1):
-        article = test_case["text"]
-        expected_type = test_case.get("expected_type")
-        description = test_case.get("description", f"Тест #{i}")
+        if result:
+            _print_radar_result(result)
+        else:
+            print("Не удалось создать черновик")
 
-        print(f"\n🧪 ТЕСТ #{i}: {description}")
         print("-" * 50)
 
-        start_time = time.time()
-        result = summarizer.summarize_news(article)
-        processing_time = time.time() - start_time
-        total_processing_time += processing_time
 
-        if "error" not in result:
-            # ✅ Проверка классификации (если ожидаемый тип указан)
-            type_match = "⚡"
-            if expected_type and expected_type != "ERROR":
-                type_match = "✅" if result['news_type'] == expected_type else "❌"
+def process_single_text(text: str, topic: str = "") -> Dict[str, Any]:
+    """
+    Быстрая обработка одного текста
+    """
+    client = OpenRouterClient()
+    processor = NewsProcessor(client)
+    return processor.create_radar_draft_from_text(text, topic)
 
-            print(f"{type_match} Тип: {result['news_type']} (ожидался: {expected_type})")
-            print(f"📝 Суммаризация: {result['summary']}")
 
-            # 📊 Детальная статистика
-            stats = result['stats']
-            print(f"📊 Статистика:")
-            print(f"   • Слов: {stats['original_words']} → {stats['summary_words']}")
-            print(f"   • Сжатие: {stats['compression_ratio_words']} ({stats['reduction_percent']})")
-            print(f"   • Качество: {stats['quality']}")
-            print(f"   • Время: {processing_time:.2f}с")
+def process_single_text_to_target_format(text: str, topic: str = "") -> Dict[str, Any]:
+    """
+    Быстрая обработка одного текста с конвертацией в целевой формат
+    """
+    client = OpenRouterClient()
+    processor = NewsProcessor(client)
+    result = processor.create_radar_draft_from_text(text, topic)
+    return convert_to_target_format(result, topic, text)
 
-            if 'summary_sentences' in stats:
-                print(f"   • Предложений: {stats['summary_sentences']}")
 
-            # 📄 Черновик (показываем только начало)
-            if result['draft']:
-                draft_preview = result['draft'][:150] + "..." if len(result['draft']) > 150 else result['draft']
-                print(f"📄 Черновик: {draft_preview}")
+def demo_full_pipeline():
+    """
+    Демонстрация полного пайплайна обработки
+    """
+    print("=" * 70)
+    print("ДЕМОНСТРАЦИЯ ПОЛНОГО ПАЙПЛАЙНА RADAR")
+    print("=" * 70)
 
-            passed_tests += 1
+    # Пример новости
+    sample_news = """
+    Компания Apple представила новые модели iPhone 16 с революционной системой искусственного интеллекта. 
+    Акции компании выросли на 5% в ходе торгов на NASDAQ. Аналитики ожидают дальнейшего роста котировок 
+    в связи с высоким спросом на новые устройства. Одновременно конкуренты Samsung и Xiaomi анонсировали 
+    ответные продукты, что может привести к обострению конкуренции на рынке смартфонов.
+    """
 
+    print("\n1. ОБРАБОТКА ЧЕРЕЗ NewsProcessor:")
+    print("-" * 40)
+
+    # Обработка через оригинальный процессор
+    original_result = process_single_text(sample_news, "Технологии")
+    if original_result:
+        _print_radar_result(original_result)
+
+    print("\n2. КОНВЕРТАЦИЯ В ЦЕЛЕВОЙ ФОРМАТ:")
+    print("-" * 40)
+
+    # Конвертация в целевой формат
+    target_result = convert_to_target_format(original_result, "Технологии")
+    print("Структура целевого формата:")
+    for key, value in target_result.items():
+        if key == "draft":
+            print(f"  draft:")
+            for sub_key, sub_value in value.items():
+                print(f"    {sub_key}: {sub_value[:50]}..." if isinstance(sub_value, str) and len(
+                    sub_value) > 50 else f"    {sub_key}: {sub_value}")
+        elif key == "statistics":
+            print(f"  statistics: [данные статистики]")
+        elif key == "entities":
+            print(f"  entities: [извлеченные сущности]")
         else:
-            print(f"❌ Ошибка: {result['error']}")
-            if expected_type == "ERROR":
-                print("✅ Ожидаемая ошибка - тест пройден")
-                passed_tests += 1
+            print(f"  {key}: {value}")
 
-        print(f"⏱️ Время обработки: {processing_time:.2f}с")
+    print("\n3. JSON ДЛЯ MONGODB:")
+    print("-" * 40)
+    print(json.dumps(target_result, indent=2, default=str, ensure_ascii=False))
 
-    # 📈 Финальная статистика
-    print("\n" + "=" * 60)
-    print("📊 ИТОГИ ТЕСТИРОВАНИЯ:")
-    print(f"✅ Пройдено тестов: {passed_tests}/{total_tests}")
-    print(f"📈 Успешность: {(passed_tests / total_tests) * 100:.1f}%")
-    print(f"⏱️ Среднее время: {total_processing_time / total_tests:.2f}с")
-
-    # 🎯 Тест производительности
-    print(f"\n🎯 ПРОИЗВОДИТЕЛЬНОСТЬ:")
-    metrics = get_summarization_metrics()
-    print(f"• Всего запросов: {metrics['total_requests']}")
-    print(f"• Ошибок: {metrics['total_errors']}")
-    print(f"• Среднее время: {metrics['avg_processing_time_seconds']}с")
-
-    # 💾 Информация о кэше (если используется)
-    try:
-        cache_info = get_cache_info()
-        print(f"💾 Кэш: {cache_info['cache_hits']} попаданий, {cache_info['cache_misses']} промахов")
-    except:
-        pass
-
-    # 🧪 Дополнительные тесты
-    print(f"\n🔍 ДОПОЛНИТЕЛЬНЫЕ ТЕСТЫ:")
-
-    # Тест на длинный текст
-    long_text = " ".join(["This is a test sentence."] * 50)
-    long_result = summarizer.summarize_news(long_text)
-    print(f"• Длинный текст: {'✅' if 'error' not in long_result else '❌'}")
-
-    # Тест на специальные символы
-    special_text = "Apple's revenue grew 15% to $100M - amazing results! #investing"
-    special_result = summarizer.summarize_news(special_text)
-    print(f"• Спецсимволы: {'✅' if 'error' not in special_result else '❌'}")
-
-    print("🎉 Тестирование завершено!")
+    return target_result
 
 
-# 🚀 Быстрый тест для разработки
-def quick_test():
-    """Быстрый тест для проверки работы системы"""
-    print("⚡ БЫСТРЫЙ ТЕСТ RADAR")
+def save_to_mongodb_format(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Подготавливает данные для сохранения в MongoDB
+    """
+    # Конвертируем datetime в строку для JSON сериализации
+    mongodb_data = data.copy()
 
-    summarizer = RADARFinancialSummarizer()
+    if "datetime" in mongodb_data and isinstance(mongodb_data["datetime"], datetime):
+        mongodb_data["datetime"] = mongodb_data["datetime"].isoformat()
 
-    test_text = """Microsoft reported strong quarterly results with cloud revenue growing 25%. 
-    The company announced a new AI partnership and increased its dividend."""
+    if "statistics" in mongodb_data:
+        stats = mongodb_data["statistics"]
+        if "processing_started" in stats and isinstance(stats["processing_started"], datetime):
+            stats["processing_started"] = stats["processing_started"].isoformat()
+        if "processing_ended" in stats and isinstance(stats["processing_ended"], datetime):
+            stats["processing_ended"] = stats["processing_ended"].isoformat()
 
-    result = summarizer.summarize_news(test_text)
+    return mongodb_data
 
-    if "error" not in result:
-        print(f"✅ Тип: {result['news_type']}")
-        print(f"✅ Суммаризация: {result['summary']}")
-        print(f"✅ Качество: {result['stats']['quality']}")
-    else:
-        print(f"❌ Ошибка: {result['error']}")
+
+def batch_process_texts(texts: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+    """
+    Пакетная обработка нескольких текстов
+    """
+    client = OpenRouterClient()
+    processor = NewsProcessor(client)
+    results = []
+
+    for i, item in enumerate(texts, 1):
+        print(f"Обработка текста {i}/{len(texts)}...")
+        try:
+            text = item.get("text", "")
+            topic = item.get("topic", "")
+
+            result = processor.create_radar_draft_from_text(text, topic)
+            target_format = convert_to_target_format(result, topic)
+            results.append(target_format)
+
+            print(f"✓ Текст {i} обработан успешно")
+
+        except Exception as e:
+            print(f"✗ Ошибка обработки текста {i}: {e}")
+            # Создаем fallback результат
+            fallback_result = {
+                "topic": topic,
+                "draft": {
+                    "title": f"Ошибка обработки: {topic}",
+                    "lead": "Не удалось обработать текст",
+                    "points": ["Ошибка в процессе анализа"]
+                },
+                "sentiment": 0.0,
+                "hotness": 0.1,
+                "why_hot": "Ошибка обработки",
+                "why_now": "Не определено",
+                "impact_analysis": "Требуется повторная обработка",
+                "statistics": {
+                    "compression": 0.1,
+                    "quality": 0.1,
+                    "processing_started": datetime.now(),
+                    "processing_ended": datetime.now()
+                },
+                "entities": {
+                    "companies": [],
+                    "tickers": [],
+                    "countries": [],
+                    "sectors": [],
+                    "currencies": []
+                },
+                "datetime": datetime.now(),
+                "links": []
+            }
+            results.append(fallback_result)
+
+    return results
 
 
 if __name__ == "__main__":
-    # Можно выбрать нужный тест
-    test_radar()  # Полный тест
+    # Запуск демонстрации
+    print("Запуск RADAR News Processor...")
+
+    # Демонстрация полного пайплайна
+    final_result = demo_full_pipeline()
+
+    print("\n" + "=" * 70)
+    print("ПРИМЕР ИСПОЛЬЗОВАНИЯ ДЛЯ MONGODB:")
+    print("=" * 70)
+
+    # Пример для MongoDB
+    mongodb_data = save_to_mongodb_format(final_result)
+    print("Данные готовы для вставки в MongoDB:")
+    print(f"collection.insert_one({json.dumps(mongodb_data, indent=2, default=str, ensure_ascii=False)})")
+
+    print("\n" + "=" * 70)
+    print("БЫСТРЫЕ ФУНКЦИИ ДОСТУПНЫ:")
+    print("=" * 70)
+    print("1. process_single_text(text, topic) - базовая обработка")
+    print("2. process_single_text_to_target_format(text, topic) - обработка с конвертацией")
+    print("3. batch_process_texts([texts]) - пакетная обработка")
+    print("4. convert_to_target_format(ai_result, topic) - конвертация существующего результата")
