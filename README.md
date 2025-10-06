@@ -1,19 +1,19 @@
-# Finance News Aggregator with Hotness and Sentiment Analysis
+# Financial News Aggregator with Hotness and Sentiment Analysis
 ### Was developed in 2 days on Finam Hackathon 2025
 ## Project architecture:
 ![Architecture](./schema.png)
 - RabbitMQ and MongoDB storages run in a cloud.
 - Each producer works with its own data source, collects data and sends it to RabbitMQ.
-- Customer accepts row data, processes it with ChatGPT and sends to MongoDB.
+- Consumer accepts row data, processes it with ChatGPT and sends to MongoDB.
 - Telegram Bot and Sentiment Map read from MongoDB to display data.
 ## Producers with realtime parsing:
 - [MarketTwits](https://t.me/markettwits): big data collection, strict filtering, news hotness calculation based on number of message forwards
 - [TradingView](https://ru.tradingview.com/news-flow/?market=bond,economic,etf,forex,futures,index,stock&market_country=entire_world&provider=reuters,rbc) (Reuters & RBC)
 - [Finmarket](https://www.finmarket.ru/)
-## Customer — processing news with LLM:
+## Consumer — processing news with LLM:
 - News hotness determination and filtering
 - Sentiment analysis
-- Finance post draft composition
+- Financial post draft composition
 - Short headline generation
 - Companies, tickers, countries, sectors and currencies extraction
 ## Contributors:

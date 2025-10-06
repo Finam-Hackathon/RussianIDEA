@@ -2,7 +2,7 @@ from pymongo import MongoClient
 import os
 import pika
 import json
-from customers.nlp import process_single_text
+from consumers.nlp import process_single_text
 from datetime import datetime
 
 client = MongoClient(os.getenv("MONGO"))
